@@ -21,6 +21,9 @@
             </div>
         </div>
     </div>
+    <!-- Q AND 10 彈窗 -->
+    <AddOrSubEffectDialog :visible="showAddOrSubDialog" :category="categoryAddOrSubDialog"
+        @confirm="handleAddOrSubEffect" />
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
@@ -28,6 +31,7 @@ import axios from 'axios'
 import type { CardValue, Card } from '@/types/baseType'
 import { translateCardsValue, translateCardsSuit, convertToCard } from '@/utils/cardUtils'
 import ScorePanel from '@/components/ScorePanel.vue'
+import AddOrSubEffectDialog from '@/components/AddOrSubEffectDialog.vue'
 let gameOver = ref(true);
 let cardList = ref<Card[]>([]);
 let deckID = ref(null);
@@ -36,6 +40,8 @@ const latestPlayedCard = ref<Card | null>(null);
 let gameScore = ref(0);
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const scorePanelRef = ref()
+const showAddOrSubDialog = ref(false)
+const categoryAddOrSubDialog = ref('')
 
 // 洗牌
 async function getDeck() {
@@ -64,31 +70,73 @@ async function getInitCards() {
 }
 
 // 出牌
-async function playCard() {
+function playCard() {
     try {
-        if (selectedCardIndex.value === null) return
-
+        if (selectedCardIndex.value === null)
+            return
         latestPlayedCard.value = cardList.value[selectedCardIndex.value]
-        handleScore(latestPlayedCard.value)
-        // 移除選中的那張牌
-        cardList.value.splice(selectedCardIndex.value, 1)
-
-        const result = await axios.get(
-            `https://www.deckofcardsapi.com/api/deck/${deckID.value}/draw/?count=1`
-        )
-        const newCard = result.data.cards[0]
-        cardList.value.push(convertToCard(newCard))
-
-        sortCardList(cardList.value)
-        selectedCardIndex.value = null
+        handleCardEffect(latestPlayedCard.value)
     } catch (error) {
         console.error('draw new card failed:', error)
     }
 }
 
-// 處理出牌
-function handleScore(card: Card) {
+// 將卡牌傳入ScorePanel 計分
+function handleCardScoring(card: Card) {
     scorePanelRef.value?.handleScore(card)
+}
+
+// 預處理功能牌
+async function handleCardEffect(card: Card) {
+    if (selectedCardIndex.value !== null) {
+        cardList.value.splice(selectedCardIndex.value, 1);
+        selectedCardIndex.value = null;
+    }
+
+    switch (card.effect) {
+        case 'add_or_sub_twenty':
+            categoryAddOrSubDialog.value = 'add_or_sub_twenty'
+            showAddOrSubDialog.value = true;
+            break;
+
+        case 'add_or_sub_ten':
+            categoryAddOrSubDialog.value = 'add_or_sub_ten'
+            showAddOrSubDialog.value = true;
+            break;
+
+        case 'designate_next_player':
+            handleCardScoring(card);
+            await getNewCard();
+            break;
+
+        default:
+            handleCardScoring(card);
+            await getNewCard();
+            break;
+    }
+}
+
+// 預處理可加減功能(Q、10)
+async function handleAddOrSubEffect(parameter: number) {
+    if (latestPlayedCard.value !== null) {
+        const originScore = latestPlayedCard.value.score;
+        latestPlayedCard.value.score = originScore * parameter;
+        handleCardScoring(latestPlayedCard.value);
+        showAddOrSubDialog.value = false;
+        await getNewCard();
+    }
+}
+
+// 發新一張牌到手牌
+async function getNewCard() {
+    const result = await axios.get(
+        `https://www.deckofcardsapi.com/api/deck/${deckID.value}/draw/?count=1`
+    )
+    const newCard = result.data.cards[0]
+    cardList.value.push(convertToCard(newCard))
+
+    sortCardList(cardList.value)
+    selectedCardIndex.value = null
 }
 
 // 排序CardList
