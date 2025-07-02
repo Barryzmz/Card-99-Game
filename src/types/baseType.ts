@@ -29,5 +29,6 @@ export interface Card {
   cardValue: CardValue,
   level: number,
   value: number,
-  effect: string
+  effect: string,
+  score: number
 }
