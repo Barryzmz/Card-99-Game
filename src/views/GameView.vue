@@ -24,6 +24,9 @@
     <!-- Q AND 10 彈窗 -->
     <AddOrSubEffectDialog :visible="showAddOrSubDialog" :category="categoryAddOrSubDialog"
         @confirm="handleAddOrSubEffect" />
+    <!-- 5 指定牌 彈窗 -->
+    <DesignateEffectDialog :visible="showDesignateDialog" :otherPlayerList="otherPlayerList"
+        @confirm="handleDesignateEffect" />
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
@@ -32,6 +35,7 @@ import type { CardValue, Card } from '@/types/baseType'
 import { translateCardsValue, translateCardsSuit, convertToCard } from '@/utils/cardUtils'
 import ScorePanel from '@/components/ScorePanel.vue'
 import AddOrSubEffectDialog from '@/components/AddOrSubEffectDialog.vue'
+import DesignateEffectDialog from '@/components/DesignateEffectDialog.vue'
 let gameOver = ref(true);
 let cardList = ref<Card[]>([]);
 let deckID = ref(null);
@@ -42,7 +46,10 @@ const sortOrder = ref<'asc' | 'desc'>('desc')
 const scorePanelRef = ref()
 const showAddOrSubDialog = ref(false)
 const categoryAddOrSubDialog = ref('')
-
+const showDesignateDialog = ref(false)
+const PlayerList = ["player0", "player1", "player2", "player3"]
+const Player = "player0"
+const otherPlayerList = ref<string[]>([])
 // 洗牌
 async function getDeck() {
     try {
@@ -105,8 +112,8 @@ async function handleCardEffect(card: Card) {
             break;
 
         case 'designate_next_player':
-            handleCardScoring(card);
-            await getNewCard();
+            otherPlayerList.value = PlayerList.filter(p => p !== Player);
+            showDesignateDialog.value = true;
             break;
 
         default:
@@ -123,6 +130,16 @@ async function handleAddOrSubEffect(parameter: number) {
         latestPlayedCard.value.score = originScore * parameter;
         handleCardScoring(latestPlayedCard.value);
         showAddOrSubDialog.value = false;
+        await getNewCard();
+    }
+}
+
+// 預處理指定玩家功能
+async function handleDesignateEffect(parameter: string) {
+    if (latestPlayedCard.value !== null) {
+        latestPlayedCard.value.designate = parameter;
+        handleCardScoring(latestPlayedCard.value);
+        showDesignateDialog.value = false;
         await getNewCard();
     }
 }
