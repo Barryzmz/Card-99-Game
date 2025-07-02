@@ -30,5 +30,6 @@ export interface Card {
   level: number,
   value: number,
   effect: string,
-  score: number
+  score: number,
+  designate: string
 }

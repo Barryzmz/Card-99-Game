@@ -31,14 +31,15 @@ export function translateCardsSuit(suit: string): number {
 }
 
 export function convertToCard(cardValue: CardValue): Card {
-    const { score, level, effect } = determineCardAttributes(cardValue)
-    return {
-      cardValue,
-      level,
-      value: parseInt(translateCardsValue(cardValue.value)),
-      effect,
-      score,
-    }
+  const { score, level, effect } = determineCardAttributes(cardValue)
+  return {
+    cardValue,
+    level,
+    value: parseInt(translateCardsValue(cardValue.value)),
+    effect,
+    score,
+    designate:'',
+  }
 }
 
 export function determineCardAttributes(cardValue: CardValue): { score: number, level: number; effect: string } {
