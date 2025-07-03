@@ -37,6 +37,11 @@ import { translateCardsValue } from '@/utils/cardUtils'
 const props = defineProps<{
     latestPlayedCard: Card | null
 }>()
+
+const emit = defineEmits<{
+    (e: 'score-updated', newScore: number): void
+}>()
+
 let gameScore = ref(0);
 
 // 處理分數功能
@@ -44,7 +49,8 @@ function handleScore(card: Card) {
     const translatedValue = parseInt(translateCardsValue(card.score))
     const lastGameScore = gameScore.value
     gameScore.value = translatedValue + lastGameScore
-    console.log('lastGameScore:', lastGameScore, 'translatedValue:', translatedValue, 'GameScore:', gameScore.value)
+    emit('score-updated', gameScore.value)
+    console.log('origin Score:', lastGameScore, 'Card value:', translatedValue, 'Score:', gameScore.value)
 }
 
 defineExpose({

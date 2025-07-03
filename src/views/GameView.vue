@@ -3,7 +3,7 @@
         <div class="d-flex justify-content-center align-items-start pt-2">
             <h1 class="text-white">Card 99 Game</h1>
         </div>
-        <ScorePanel ref="scorePanelRef" :latestPlayedCard="latestPlayedCard" />
+        <ScorePanel ref="scorePanelRef" :latestPlayedCard="latestPlayedCard" @score-updated="gameScore = $event" />
         <PlayerArea ref="PlayerRef" :playerList="playerList" @playCard="handleCardScoring" />
     </div>
 </template>
