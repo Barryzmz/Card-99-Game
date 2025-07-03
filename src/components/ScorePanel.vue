@@ -1,30 +1,35 @@
 <template>
-    <div class="d-flex justify-content-center align-items-start my-2">
-        <div class="d-flex flex-row align-items-center justify-content-center text-white bg-dark p-4 rounded">
-            <div class="mb-3 text-center mx-2">
-                <div class="d-flex justify-content-center align-items-center bg-light rounded p-4"
-                    style="background-color: white; width: 400px; min-height: 300px;">
-                    <template v-if="latestPlayedCard !== null">
-                        <div class="d-flex flex-row align-items-start">
-                            <img :src="latestPlayedCard.cardValue?.images?.png" style="height: 200px;" class="me-3" />
-                            <div class="text-dark text-start p-3" style="min-width: 150px;">
-                                <p class="mb-1">Value: {{ latestPlayedCard.cardValue?.value }}</p>
-                                <p class="mb-1">Suit: {{ latestPlayedCard.cardValue?.suit }}</p>
-                                <p class="mb-1">Level: {{ latestPlayedCard.level }}</p>
-                                <p class="mb-1">Score: {{ latestPlayedCard.score }}</p>
-                                <p class="mb-0">Effect: {{ latestPlayedCard.effect }}</p>
-                            </div>
-                        </div>
-                    </template>
-                    <template v-else>
-                        <p class="text-muted fst-italic">Start Game</p>
-                    </template>
-                </div>
+    <div class="container bg-dark text-white p-3">
+        <div class="d-flex gap-2 mb-2">
+            <div class="flex-grow-1 bg-white text-dark p-3 rounded">
+                <h1 class="m-0">Score: {{ gameScore }}</h1>
             </div>
-            <div class="mb-3 text-center mx-2">
-                <div class="d-flex flex-column justify-content-start align-items-center bg-light rounded p-3">
-                    <h1 class="mt-2 mb-0 text-dark">Current Score:</h1>
-                    <h1 class="mt-2 mb-0 text-dark">{{ gameScore }}</h1>
+            <div class="bg-white text-dark p-3 rounded d-flex align-items-center justify-content-center"
+                style="min-width: 50px;">
+                <h2 class="fw-bold m-0">CW</h2>
+            </div>
+        </div>
+        <div class="d-flex gap-2 align-items-stretch">
+            <div class="bg-white p-3 rounded d-flex flex-column justify-content-center align-items-center"
+                style="height: 250px;">
+                <template v-if="latestPlayedCard !== null">
+                    <h4 class="text-dark mb-2">Latest Card:</h4>
+                    <img :src="latestPlayedCard.cardValue?.images?.png" style="height: 200px;" />
+                </template>
+                <template v-else>
+                    <h4 class="text-muted fst-italic">Start Game</h4>
+                </template>
+            </div>
+            <div class="d-flex flex-column justify-content-between flex-grow-1">
+                <div class="bg-white text-dark p-3 rounded mb-2">
+                    <h4 class="m-0">Now Playing:</h4>
+                    <h4 class="m-0">test</h4>
+                </div>
+                <div class="bg-white text-dark p-3 rounded">
+                    <h4 class="m-0">Latest state:</h4>
+                    <h4 class="m-0">Player</h4>
+                    <h4 class="m-0">test</h4>
+                    <h4 class="m-0">Latest state:</h4>
                 </div>
             </div>
         </div>
