@@ -17,8 +17,8 @@
                 </template>
             </div>
             <div class="d-flex flex-column justify-content-between flex-grow-1" style="height: 250px;">
-                <div class="bg-white text-dark p-3 rounded mb-2">
-                    <h4 class="m-0">Now Playing:</h4>
+                <div class="bg-white text-dark p-3 rounded">
+                    <h3 class="m-0">Now Playing:</h3>
                     <h4 class="m-0">{{ currentPlayer }}</h4>
                 </div>
                 <div class="bg-white text-dark p-3 rounded mt-auto d-flex flex-column align-items-start mt-1"
@@ -26,7 +26,7 @@
                     <h3 class="m-0">Latest state:</h3>
                     <h4 class="m-0">player: {{ latestPlayer }}</h4>
                     <h4 class="m-0">play: {{ latestPlayedCard?.cardValue.code }}</h4>
-                    <h4 class="m-0">effect: {{ latestPlayer }}</h4>
+                    <h4 class="m-0">effect: {{ latestEffect }}</h4>
                 </div>
             </div>
         </div>
@@ -47,14 +47,52 @@ const emit = defineEmits<{
 }>()
 
 let gameScore = ref(0);
+let latestEffect = ref('')
 
 // 處理分數功能
 function handleScore(card: Card) {
     const translatedValue = parseInt(translateCardsValue(card.score))
     const lastGameScore = gameScore.value
     gameScore.value = translatedValue + lastGameScore
+    handleCardEffectDiscription(card)
     emit('score-updated', gameScore.value)
     console.log('origin Score:', lastGameScore, 'Card value:', translatedValue, 'Score:', gameScore.value)
+}
+
+// 處理Effect 描述
+function handleCardEffectDiscription(card: Card) {
+    switch (card.effect) {
+        case "reverse_turn_order":
+            latestEffect.value = "Reverse turn order";
+            break;
+        case "designate_next_player":
+            latestEffect.value = `Designate to ${card.designate.name}`;
+            break;
+        case "add_or_sub_ten":
+            if (card.score > 0) 
+                latestEffect.value = `Add 10`
+            else 
+                latestEffect.value = `subtract 10`
+            break;
+        case "skip_turn":
+            latestEffect.value = `Skip turn`
+            break;
+        case "add_or_sub_twenty":
+            if (card.score > 0) 
+                latestEffect.value = `Add 20`
+            else 
+                latestEffect.value = `subtract 20`
+            break;
+        case "set_score_to_ninetyNine":
+            latestEffect.value = `Set the score to 99`
+            break;
+        case "reset_score":
+            latestEffect.value = `Set the score to 0`
+            break;
+        default:
+            latestEffect.value = `Add ${card.score}`
+            break;
+    }
 }
 
 defineExpose({
