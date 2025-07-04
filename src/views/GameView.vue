@@ -11,8 +11,12 @@
                 </div>
                 <div class="row d-flex justify-content-center mx-0 overflow-hidden">
                     <div class="col-6 p-0">
-                        <ScorePanel ref="scorePanelRef" :latestPlayedCard="latestPlayedCard"
-                            @score-updated="gameScore = $event" />
+                        <ScorePanel ref="scorePanelRef" 
+                            :latestPlayer="latestPlayer?.name ?? null"
+                            :currentPlayer="activeAccount?.name ?? null" 
+                            :latestPlayedCard="latestPlayedCard"
+                            @score-updated="gameScore = $event" 
+                        />
                     </div>
                 </div>
                 <PlayerArea ref="playerRef" :playerInfo="player" :playerList="playerList"
@@ -31,6 +35,7 @@ import PlayerArea from '@/components/Player.vue'
 import ComputerPlayer from '@/components/ComputerPlayer.vue'
 let deckID = ref(null);
 const latestPlayedCard = ref<Card | null>(null);
+const latestPlayer = ref<Account | null>(null);
 let gameScore = ref(0);
 const scorePanelRef = ref()
 let otherPlayer = ref<Account>(
@@ -93,9 +98,21 @@ async function getInitCards() {
     }
 }
 
+// 指定牌用accountId設定activeIndex
+function setActiveByAccountId(accountId: string) {
+  const idx = gamePlayerList.findIndex(p => p.accountId === accountId)
+  if (idx !== -1) {
+    activeIndex.value = idx
+    activeAccount.value = gamePlayerList[idx]
+  } else {
+    console.warn(`Can't find player with accountId=${accountId}`)
+  }
+}
+
 // 將卡牌傳入ScorePanel 計分
 function handleCardScoring(card: Card) {
     latestPlayedCard.value = card
+    latestPlayer.value = activeAccount.value
     scorePanelRef.value?.handleScore(card)
     //抓下一個玩家的組件ref
     const nextInst = allPlayerRefs.value[activeIndex.value]
@@ -120,11 +137,17 @@ function getPlayerNames() {
     playerList = [...gamePlayerList];
 }
 
+// 設定最一開始的玩家
+function setInitTurn() {
+  activeAccount.value = gamePlayerList[activeIndex.value];
+}
+
 onMounted(async () => {
     try {
         getPlayerNames();
         await getDeck();
         await getInitCards();
+        setInitTurn()
     } catch (e: any) {
         console.error('onMounted failed:', e)
         throw new Error(e);
