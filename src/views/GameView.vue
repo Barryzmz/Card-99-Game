@@ -2,7 +2,7 @@
     <div class="container-fluid min-vh-100 p-0 bg-success">
         <div class="row d-flex justify-content-center mx-0 ">
             <div class="col-2 p-0">
-                <ComputerPlayer :isActive="activeIndex === otherPlayer.idx" :playerInfo="otherPlayer"
+                <ComputerPlayer :isActive="activeAccount?.accountId === otherPlayer.accountId" :playerInfo="otherPlayer"
                     :playerList="playerList" ref="computerPlayerRef" @playCard="handleCardScoring" />
             </div>
             <div class="col-10 p-0">
@@ -16,7 +16,7 @@
                     </div>
                 </div>
                 <PlayerArea ref="playerRef" :playerInfo="player" :playerList="playerList"
-                    :isActive="activeIndex === player.idx" @playCard="handleCardScoring" />
+                    :isActive="activeAccount?.accountId === player.accountId" @playCard="handleCardScoring" />
             </div>
         </div>
     </div>
@@ -47,6 +47,7 @@ const gamePlayerList: Account[] = [
 const computerPlayerRef = ref<InstanceType<typeof ComputerPlayer> | null>(null)
 const playerRef = ref<InstanceType<typeof PlayerArea> | null>(null)
 const activeIndex = ref(0)
+const activeAccount = ref<Account | null>(null);
 const isReversed = ref(false)
 const allPlayerRefs = computed(() => [
     playerRef.value,
@@ -60,6 +61,7 @@ const nextPlayer = () => {
     } else {
         activeIndex.value = (activeIndex.value + 1) % allPlayerRefs.value.length
     }
+    activeAccount.value = gamePlayerList[activeIndex.value];
 }
 
 // 洗牌
