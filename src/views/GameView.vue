@@ -11,12 +11,9 @@
                 </div>
                 <div class="row d-flex justify-content-center mx-0 overflow-hidden">
                     <div class="col-6 p-0">
-                        <ScorePanel ref="scorePanelRef" 
-                            :latestPlayer="latestPlayer?.name ?? null"
-                            :currentPlayer="activeAccount?.name ?? null" 
-                            :latestPlayedCard="latestPlayedCard"
-                            @score-updated="gameScore = $event" 
-                        />
+                        <ScorePanel ref="scorePanelRef" :latestPlayer="latestPlayer?.name ?? null"
+                            :currentPlayer="activeAccount?.name ?? null" :latestPlayedCard="latestPlayedCard"
+                            @score-updated="gameScore = $event" />
                     </div>
                 </div>
                 <PlayerArea ref="playerRef" :playerInfo="player" :playerList="playerList"
@@ -100,13 +97,13 @@ async function getInitCards() {
 
 // 指定牌用accountId設定activeIndex
 function setActiveByAccountId(accountId: string) {
-  const idx = gamePlayerList.findIndex(p => p.accountId === accountId)
-  if (idx !== -1) {
-    activeIndex.value = idx
-    activeAccount.value = gamePlayerList[idx]
-  } else {
-    console.warn(`Can't find player with accountId=${accountId}`)
-  }
+    const idx = gamePlayerList.findIndex(p => p.accountId === accountId)
+    if (idx !== -1) {
+        activeIndex.value = idx
+        activeAccount.value = gamePlayerList[idx]
+    } else {
+        console.warn(`Can't find player with accountId=${accountId}`)
+    }
 }
 
 // 將卡牌傳入ScorePanel 計分
@@ -124,12 +121,20 @@ function handleCardScoring(card: Card) {
 
 // 發新一張牌到手牌
 async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => void }) {
-    console.log('getNewCard-targetInstance:', targetInstance)
-    const { data } = await axios.get(
-        `https://www.deckofcardsapi.com/api/deck/${deckID.value}/draw/?count=1`
-    )
-    const newCard = convertToCard(data.cards[0] as CardValue)
-    targetInstance.receiveCards([newCard])
+    async function tryDraw(count = 1) {
+        const res = await axios.get(
+            `https://www.deckofcardsapi.com/api/deck/${deckID.value}/draw/?count=${count}`
+        );
+        return res.data;
+    }
+    let data = await tryDraw(1);
+    if (!data.cards.length) {
+        deckID.value = null
+        await getDeck();
+        data = await tryDraw(1);
+    }
+    const newCard = convertToCard((data.cards as CardValue[])[0]);
+    targetInstance.receiveCards([newCard]);
 }
 
 // 把使用者加入遊戲順序清單
@@ -139,7 +144,7 @@ function getPlayerNames() {
 
 // 設定最一開始的玩家
 function setInitTurn() {
-  activeAccount.value = gamePlayerList[activeIndex.value];
+    activeAccount.value = gamePlayerList[activeIndex.value];
 }
 
 onMounted(async () => {
