@@ -7,7 +7,7 @@
             <div style="max-height: 500px; overflow-y: auto;">
                 <div class="d-flex justify-content-end" v-for="player in otherPlayerList" :key="player.accountId">
                     <button class="btn btn-primary flex-fill mt-2" style="min-width: 120px; height: 50px;"
-                        @click="emitEffect(player.accountId)">
+                        @click="emitEffect(player.accountId, player.name)">
                         {{ player.name }}
                     </button>
                 </div>
@@ -24,12 +24,13 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    (e: 'confirm', parameter: string): void
+    (e: 'confirm', accountId: string, name: string): void
 }>()
 
-function emitEffect(parameter: string) {
-    emit('confirm', parameter)
+function emitEffect(accountId: string, name: string) {
+    emit('confirm', accountId, name)
 }
+
 
 
 </script>

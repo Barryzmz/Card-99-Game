@@ -29,5 +29,6 @@ export interface Card {
   value: number,
   effect: string,
   score: number,
-  designate: string
+  designate: {accountId: string, name: string}
 }
+

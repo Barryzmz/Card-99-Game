@@ -101,12 +101,13 @@ async function handleAddOrSubEffect(parameter: number) {
 }
 
 // 預處理指定玩家功能
-async function handleDesignateEffect(parameter: string) {
-    if (latestPlayedCard.value !== null) {
-        latestPlayedCard.value.designate = parameter;
-        handleCardScoring(latestPlayedCard.value);
-        showDesignateDialog.value = false;
-    }
+function handleDesignateEffect(accountId: string, name: string) {
+  if (latestPlayedCard.value !== null) {
+    latestPlayedCard.value.designate.accountId = accountId;
+    latestPlayedCard.value.designate.name = name;
+    handleCardScoring(latestPlayedCard.value);
+    showDesignateDialog.value = false;
+  }
 }
 
 // 接收發牌

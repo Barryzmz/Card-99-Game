@@ -38,7 +38,7 @@ export function convertToCard(cardValue: CardValue): Card {
     value: parseInt(translateCardsValue(cardValue.value)),
     effect,
     score,
-    designate:'',
+    designate:{accountId:'',name:''},
   }
 }
 
