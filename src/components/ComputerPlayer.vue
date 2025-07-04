@@ -56,7 +56,7 @@ function handleCardScoring(card: Card) {
 }
 
 // 出牌
-async function playCard() {
+function playCard() {
     try {
         if (selectedCardIndex.value === null) return
         latestPlayedCard.value = cardList.value[selectedCardIndex.value]
@@ -67,7 +67,7 @@ async function playCard() {
 }
 
 // 預處理功能牌
-async function handleCardEffect(card: Card) {
+function handleCardEffect(card: Card) {
     if (selectedCardIndex.value !== null) {
         cardList.value.splice(selectedCardIndex.value, 1);
         selectedCardIndex.value = null;
@@ -97,7 +97,7 @@ async function handleCardEffect(card: Card) {
 }
 
 // 預處理可加減功能(Q、10)
-async function handleAddOrSubEffect(parameter: number) {
+function handleAddOrSubEffect(parameter: number) {
     if (latestPlayedCard.value !== null) {
         const originScore = latestPlayedCard.value.score;
         latestPlayedCard.value.score = originScore * parameter;
@@ -123,11 +123,11 @@ function receiveCards(cards: Card[]) {
     });
 }
 
-onMounted(async () => {
+onMounted(() => {
     try {
-    } catch (e: any) {
-        console.error('onMounted failed:', e)
-        throw new Error(e);
+    } catch (e: unknown) {
+        console.error('onMounted failed:', e);
+        throw e;
     }
 })
 </script>

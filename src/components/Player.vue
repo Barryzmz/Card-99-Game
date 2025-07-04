@@ -51,7 +51,7 @@ function handleCardScoring(card: Card) {
 }
 
 // 出牌
-async function playCard() {
+function playCard() {
     try {
         if (selectedCardIndex.value === null) return
         latestPlayedCard.value = cardList.value[selectedCardIndex.value]
@@ -62,7 +62,7 @@ async function playCard() {
 }
 
 // 預處理功能牌
-async function handleCardEffect(card: Card) {
+function handleCardEffect(card: Card) {
     if (selectedCardIndex.value !== null) {
         cardList.value.splice(selectedCardIndex.value, 1);
         selectedCardIndex.value = null;
@@ -91,7 +91,7 @@ async function handleCardEffect(card: Card) {
 }
 
 // 預處理可加減功能(Q、10)
-async function handleAddOrSubEffect(parameter: number) {
+function handleAddOrSubEffect(parameter: number) {
     if (latestPlayedCard.value !== null) {
         const originScore = latestPlayedCard.value.score;
         latestPlayedCard.value.score = originScore * parameter;
@@ -102,12 +102,12 @@ async function handleAddOrSubEffect(parameter: number) {
 
 // 預處理指定玩家功能
 function handleDesignateEffect(accountId: string, name: string) {
-  if (latestPlayedCard.value !== null) {
-    latestPlayedCard.value.designate.accountId = accountId;
-    latestPlayedCard.value.designate.name = name;
-    handleCardScoring(latestPlayedCard.value);
-    showDesignateDialog.value = false;
-  }
+    if (latestPlayedCard.value !== null) {
+        latestPlayedCard.value.designate.accountId = accountId;
+        latestPlayedCard.value.designate.name = name;
+        handleCardScoring(latestPlayedCard.value);
+        showDesignateDialog.value = false;
+    }
 }
 
 // 接收發牌
@@ -147,12 +147,12 @@ function toggleCardSelection(index: number) {
     selectedCardIndex.value = selectedCardIndex.value === index ? null : index;
 }
 
-onMounted(async () => {
+onMounted(() => {
     try {
         sortCardList(cardList.value);
-    } catch (e: any) {
-        console.error('onMounted failed:', e)
-        throw new Error(e);
+    } catch (e: unknown) {
+        console.error('onMounted failed:', e);
+        throw e;
     }
 })
 </script>
