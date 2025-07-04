@@ -1,4 +1,5 @@
 export interface Account {
+  idx: number
   avatar: string
   accountId: string
   name: string
