@@ -9,8 +9,8 @@
             </div>
         </div>
         <div class="d-flex flex-column">
-            <button type="button" class="btn btn-primary btn-lg my-2" :disabled="selectedCardIndex === null"
-                @click="playCard">Play</button>
+            <button type="button" class="btn btn-primary btn-lg my-2"
+                :disabled="selectedCardIndex === null || !isActive" @click="playCard">Play</button>
         </div>
         <AddOrSubEffectDialog :visible="showAddOrSubDialog" :category="categoryAddOrSubDialog"
             @confirm="handleAddOrSubEffect" />
