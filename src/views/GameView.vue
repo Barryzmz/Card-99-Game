@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import axios from 'axios'
-import type { CardValue, Card } from '@/types/baseType'
+import type { CardValue, Card, Account } from '@/types/baseType'
 import { convertToCard } from '@/utils/cardUtils'
 import ScorePanel from '@/components/ScorePanel.vue'
 import PlayerArea from '@/components/Player.vue'
@@ -24,7 +24,13 @@ let deckID = ref(null);
 const latestPlayedCard = ref<Card | null>(null);
 let gameScore = ref(0);
 const scorePanelRef = ref()
-const playerList = ["playerZero", "playerOne", "playerTw0", "playerThree"]
+let playerList: Account[] = []
+const gamePlayerList: Account[] = [
+    { avatar: '', accountId: 'player0', name: 'BarryZhuang' },
+    { avatar: '', accountId: 'player1', name: 'Player1_Name' },
+    { avatar: '', accountId: 'player2', name: 'Player2_Name' },
+    { avatar: '', accountId: 'player3', name: 'Player3_Name' }
+]
 const PlayerRef = ref()
 
 // 洗牌
@@ -71,8 +77,14 @@ async function getNewCard(refTarget: any) {
     refTarget.value.receiveCards([newCard]);
 }
 
+// 把使用者加入遊戲順序清單
+function getPlayerNames() {
+    playerList = [...gamePlayerList];
+}
+
 onMounted(async () => {
     try {
+        getPlayerNames();
         await getDeck();
         await getInitCards();
     } catch (e: any) {

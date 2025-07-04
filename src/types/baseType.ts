@@ -1,10 +1,7 @@
 export interface Account {
   avatar: string
   accountId: string
-  accountName: string
   name: string
-  type: string
-  introduction: string
 }
 
 export interface CardValue {

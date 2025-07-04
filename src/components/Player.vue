@@ -20,7 +20,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import type { Card } from '@/types/baseType'
+import type { Card, Account } from '@/types/baseType'
 import { translateCardsValue, translateCardsSuit } from '@/utils/cardUtils'
 import AddOrSubEffectDialog from '@/components/AddOrSubEffectDialog.vue'
 import DesignateEffectDialog from '@/components/DesignateEffectDialog.vue'
@@ -31,11 +31,11 @@ const sortOrder = ref<'asc' | 'desc'>('desc')
 const showAddOrSubDialog = ref(false)
 const categoryAddOrSubDialog = ref('')
 const showDesignateDialog = ref(false)
-const Player = "playerZero"
-const otherPlayerList = ref<string[]>([])
+const PlayerInfo: Account = { avatar: '', accountId: 'player0', name: 'BarryZhuang' }
+const otherPlayerList = ref<Account[]>([])
 
 const props = defineProps<{
-    playerList: string[]
+    playerList: Account[]
 }>()
 
 const emit = defineEmits<{
@@ -79,7 +79,7 @@ async function handleCardEffect(card: Card) {
             break;
 
         case 'designate_next_player':
-            otherPlayerList.value = props.playerList.filter(p => p !== Player);
+            otherPlayerList.value = props.playerList.filter(p => p.accountId !== PlayerInfo.accountId);
             showDesignateDialog.value = true;
             break;
 
