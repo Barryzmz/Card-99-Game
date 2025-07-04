@@ -31,11 +31,12 @@ const sortOrder = ref<'asc' | 'desc'>('desc')
 const showAddOrSubDialog = ref(false)
 const categoryAddOrSubDialog = ref('')
 const showDesignateDialog = ref(false)
-const PlayerInfo: Account = { avatar: '', accountId: 'player0', name: 'BarryZhuang' }
 const otherPlayerList = ref<Account[]>([])
 
 const props = defineProps<{
     playerList: Account[]
+    playerInfo: Account
+    isActive: boolean
 }>()
 
 const emit = defineEmits<{
@@ -79,7 +80,7 @@ async function handleCardEffect(card: Card) {
             break;
 
         case 'designate_next_player':
-            otherPlayerList.value = props.playerList.filter(p => p.accountId !== PlayerInfo.accountId);
+            otherPlayerList.value = props.playerList.filter(p => p.accountId !== props.playerInfo.accountId);
             showDesignateDialog.value = true;
             break;
 
