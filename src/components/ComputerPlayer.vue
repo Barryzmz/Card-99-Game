@@ -35,6 +35,7 @@ watch(
 
 const emit = defineEmits<{
     (e: 'playCard', card: Card): void
+    (e: 'reportPlayerEliminated', playerInfo: Account): void
 }>()
 
 // 算出距離max score的的數值
@@ -52,7 +53,8 @@ async function AnalysisPlayCard() {
     const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value )
     if (bestCard == null){
         console.log(props.playerInfo.name, '<<<<<lose>>>>>')
-        console.log(props.playerInfo.name,'`s card List',cardList.value )
+        console.log(props.playerInfo.name,"'s cardList", cardList.value)
+        reportPlayerEliminated(props.playerInfo)
     }
     selectedCardIndex.value = cardList.value.findIndex(card => card === bestCard)
     playCard()
@@ -61,6 +63,11 @@ async function AnalysisPlayCard() {
 // 將卡牌傳出去
 function handleCardScoring(card: Card) {
     emit('playCard', card)
+}
+
+// 告知賽局這個玩家沒牌可出所以出局
+function reportPlayerEliminated(player: Account) {
+  emit('reportPlayerEliminated', player)
 }
 
 // 出牌

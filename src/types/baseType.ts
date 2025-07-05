@@ -3,6 +3,7 @@ export interface Account {
   avatar: string
   accountId: string
   name: string
+  status: string
 }
 
 export interface CardValue {

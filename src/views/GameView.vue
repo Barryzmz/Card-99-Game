@@ -2,12 +2,13 @@
     <div class="container-fluid min-vh-100 p-0 bg-success">
         <div class="row d-flex justify-content-center mx-0 ">
             <div class="col-2 p-0">
-                <ComputerPlayer ref="computerPlayerRef" 
-                    :isActive="activeAccount?.accountId === otherPlayer.accountId" 
+                <ComputerPlayer ref="computerPlayerRef"
+                    :isActive="activeAccount?.accountId === otherPlayer.accountId"
                     :playerInfo="otherPlayer"
-                    :playerList="playerList"  
-                    :gameScore = "gameScore" 
-                    @playCard="handleCardScoring" 
+                    :playerList="playerList"
+                    :gameScore="gameScore"
+                    @playCard="handleCardScoring"
+                    @reportPlayerEliminated="handlePlayerEliminated"
                 />
             </div>
             <div class="col-10 p-0">
@@ -21,12 +22,12 @@
                             @score-updated="gameScore = $event" />
                     </div>
                 </div>
-                <PlayerArea ref="playerRef" 
-                    :isActive="activeAccount?.accountId === player.accountId" 
-                    :playerInfo="player" 
+                <PlayerArea ref="playerRef"
+                    :isActive="activeAccount?.accountId === player.accountId"
+                    :playerInfo="player"
                     :playerList="playerList"
-                    :gameScore = "gameScore" 
-                    @playCard="handleCardScoring" 
+                    :gameScore="gameScore"
+                    @playCard="handleCardScoring"
                 />
             </div>
         </div>
@@ -46,15 +47,15 @@ const latestPlayer = ref<Account | null>(null);
 let gameScore = ref(0);
 const scorePanelRef = ref()
 let otherPlayer = ref<Account>(
-    { idx: 1, avatar: '', accountId: 'player1', name: 'Player1_Name' },
+    { idx: 1, avatar: '', accountId: 'player1', name: 'Player1_Name', status: 'playing' },
 )
 let player = ref<Account>(
-    { idx: 0, avatar: '', accountId: 'player0', name: 'BarryZhuang' }
+    { idx: 0, avatar: '', accountId: 'player0', name: 'BarryZhuang', status: 'playing' }
 )
 let playerList: Account[] = []
 const gamePlayerList: Account[] = [
-    { idx: 0, avatar: '', accountId: 'player0', name: 'BarryZhuang' },
-    { idx: 1, avatar: '', accountId: 'player1', name: 'Player1_Name' }
+    { idx: 0, avatar: '', accountId: 'player0', name: 'BarryZhuang', status: 'playing' },
+    { idx: 1, avatar: '', accountId: 'player1', name: 'Player1_Name', status: 'playing' }
 ]
 const computerPlayerRef = ref<InstanceType<typeof ComputerPlayer> | null>(null)
 const playerRef = ref<InstanceType<typeof PlayerArea> | null>(null)
@@ -67,13 +68,26 @@ const allPlayerRefs = computed(() => [
 ])
 
 // 處理誰是下一位玩家
-const nextPlayer = () => {
-    if (isReversed.value) {
-        activeIndex.value = (activeIndex.value - 1 + allPlayerRefs.value.length) % allPlayerRefs.value.length
-    } else {
-        activeIndex.value = (activeIndex.value + 1) % allPlayerRefs.value.length
-    }
-    activeAccount.value = gamePlayerList[activeIndex.value];
+function nextPlayer() {
+    const len = allPlayerRefs.value.length
+    let newIndex = activeIndex.value
+    let attempts = 0
+    do {
+        if (++attempts > len) {
+            console.warn('All players are out')
+            return
+        }
+
+        newIndex = isReversed.value
+            ? (newIndex - 1 + len) % len
+            : (newIndex + 1) % len
+        const candidate = gamePlayerList[newIndex]
+        if (candidate.status !== 'eliminated') {
+            break
+        }
+    } while (newIndex !== activeIndex.value)
+    activeIndex.value = newIndex
+    activeAccount.value = gamePlayerList[newIndex]
 }
 
 // 洗牌
@@ -132,6 +146,16 @@ function handleCardScoring(card: Card) {
     handleEffectCard(card);
 }
 
+// 將失敗的玩家設定成eliminated
+function handlePlayerEliminated(account: Account) {
+  const idx = gamePlayerList.findIndex(p => p.accountId === account.accountId);
+  if (idx !== -1) {
+    gamePlayerList[idx].status = 'eliminated';
+  }
+  nextPlayer();
+}
+
+// 處理牌對回合效果
 function handleEffectCard(card: Card) {
     switch (card.effect) {
         case 'reverse_turn_order':
