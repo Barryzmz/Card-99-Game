@@ -2,8 +2,13 @@
     <div class="container-fluid min-vh-100 p-0 bg-success">
         <div class="row d-flex justify-content-center mx-0 ">
             <div class="col-2 p-0">
-                <ComputerPlayer :isActive="activeAccount?.accountId === otherPlayer.accountId" :playerInfo="otherPlayer"
-                    :playerList="playerList" ref="computerPlayerRef" @playCard="handleCardScoring" />
+                <ComputerPlayer ref="computerPlayerRef" 
+                    :isActive="activeAccount?.accountId === otherPlayer.accountId" 
+                    :playerInfo="otherPlayer"
+                    :playerList="playerList"  
+                    :gameScore = "gameScore" 
+                    @playCard="handleCardScoring" 
+                />
             </div>
             <div class="col-10 p-0">
                 <div class="d-flex justify-content-center align-items-start pt-2">
@@ -16,8 +21,13 @@
                             @score-updated="gameScore = $event" />
                     </div>
                 </div>
-                <PlayerArea ref="playerRef" :playerInfo="player" :playerList="playerList"
-                    :isActive="activeAccount?.accountId === player.accountId" @playCard="handleCardScoring" />
+                <PlayerArea ref="playerRef" 
+                    :isActive="activeAccount?.accountId === player.accountId" 
+                    :playerInfo="player" 
+                    :playerList="playerList"
+                    :gameScore = "gameScore" 
+                    @playCard="handleCardScoring" 
+                />
             </div>
         </div>
     </div>

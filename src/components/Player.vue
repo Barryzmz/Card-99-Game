@@ -37,6 +37,7 @@ const props = defineProps<{
     playerList: Account[]
     playerInfo: Account
     isActive: boolean
+    gameScore: number
 }>()
 
 const emit = defineEmits<{

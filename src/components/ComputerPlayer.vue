@@ -21,9 +21,10 @@ const showDesignateDialog = ref(false)
 const otherPlayerList = ref<Account[]>([])
 const PlayerInfo: Account | null = null;
 const props = defineProps<{
-    playerList: Account[],
-    playerInfo: Account,
+    playerList: Account[]
+    playerInfo: Account
     isActive: boolean
+    gameScore: number
 }>()
 
 watch(
