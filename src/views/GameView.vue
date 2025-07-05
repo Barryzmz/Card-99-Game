@@ -118,15 +118,37 @@ function setActiveByAccountId(accountId: string) {
 
 // 將卡牌傳入ScorePanel 計分
 function handleCardScoring(card: Card) {
+    const playerName = activeAccount.value?.name || ''
     latestPlayedCard.value = card
     latestPlayer.value = activeAccount.value
-    scorePanelRef.value?.handleScore(card)
+    scorePanelRef.value?.handleScore(card, playerName)
     //抓下一個玩家的組件ref
     const nextInst = allPlayerRefs.value[activeIndex.value]
     if (nextInst) {
         getNewCard(nextInst)
     }
-    nextPlayer()
+    handleEffectCard(card);
+}
+
+function handleEffectCard(card: Card) {
+    switch (card.effect) {
+        case 'reverse_turn_order':
+            isReversed.value = !isReversed.value
+            nextPlayer()
+            break;
+
+        case 'designate_next_player':
+            setActiveByAccountId(card.designate.accountId)
+            break;
+
+        case 'skip_turn':
+            nextPlayer();
+            break;
+
+        default:
+            nextPlayer();
+            break;
+    }
 }
 
 // 發新一張牌到手牌
