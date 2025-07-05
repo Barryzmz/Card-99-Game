@@ -1,6 +1,6 @@
-import type { CardValue, Card  } from '@/types/baseType'
+import type { CardValue, Card, Account } from '@/types/baseType'
 
-export function translateCardsValue(value: any) {
+export function translateCardsValue(value: any): string {
   switch (value) {
     case "JACK":
       value = "11";
@@ -73,4 +73,28 @@ export function determineCardAttributes(cardValue: CardValue): { score: number, 
     default:
       return { score: parseInt(value), level: 1, effect: '' }
   }
+}
+
+export function analyszeBestPlay(cardsList: Card[], score: number): Card | null {
+  const level1 = cardsList
+  .filter(card => card.level === 1 && card.score < score)
+  .sort((a, b) => b.score - a.score);
+  if (level1.length > 0) return level1[0];
+
+  const level2 = cardsList
+  .filter(card => card.level === 2)
+  .sort((a, b) => a.score - b.score);
+  if (level2.length > 0) return level2[0];
+
+  const level3 = cardsList
+  .filter(card => card.level === 3);
+  if (level3.length > 0) return level3[0];
+
+  return null;
+}
+
+export function getRandomAccount(accountList: Account[]) {
+  if (accountList.length === 0) return null;
+  const randomIndex = Math.floor(Math.random() * accountList.length);
+  return accountList[randomIndex];
 }
