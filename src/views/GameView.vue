@@ -1,7 +1,15 @@
 <template>
     <div class="container-fluid min-vh-100 p-0 bg-success">
         <div class="row d-flex justify-content-center mx-0 ">
-            <div class="col-2 p-0">
+            <div class="col-3 pt-2 bg-secondary">
+                <div class="d-flex justify-content-center align-items-center bg-light p-2 mb-2 rounded">
+                    <div class="col-auto">
+                        <h3 class="text-dark mb-0">Turn Order:</h3>
+                    </div>
+                    <div class="col-auto mx-3">
+                        <img :src="isReversed ? upArrow : downArrow" style="height: 40px;" alt="turn order arrow" />
+                    </div>
+                </div>
                 <ComputerPlayer ref="computerPlayerRef"
                     :isActive="activeAccount?.accountId === otherPlayer.accountId"
                     :playerInfo="otherPlayer"
@@ -11,15 +19,18 @@
                     @reportPlayerEliminated="handlePlayerEliminated"
                 />
             </div>
-            <div class="col-10 p-0">
+            <div class="col-9 p-0">
                 <div class="d-flex justify-content-center align-items-start pt-2">
                     <h3 class="text-white">Card 99 Game</h3>
                 </div>
                 <div class="row d-flex justify-content-center mx-0 overflow-hidden">
-                    <div class="col-6 p-0">
-                        <ScorePanel ref="scorePanelRef" :latestPlayer="latestPlayer?.name ?? null"
-                            :currentPlayer="activeAccount?.name ?? null" :latestPlayedCard="latestPlayedCard"
-                            @score-updated="gameScore = $event" />
+                    <div class="col-8 p-0">
+                        <ScorePanel ref="scorePanelRef" 
+                            :latestPlayer="latestPlayer?.name ?? null"
+                            :currentPlayer="activeAccount?.name ?? null" 
+                            :latestPlayedCard="latestPlayedCard"
+                            @score-updated="gameScore = $event"
+                        />
                     </div>
                 </div>
                 <PlayerArea ref="playerRef"
@@ -41,6 +52,8 @@ import { convertToCard } from '@/utils/cardUtils'
 import ScorePanel from '@/components/ScorePanel.vue'
 import PlayerArea from '@/components/Player.vue'
 import ComputerPlayer from '@/components/ComputerPlayer.vue'
+import upArrow from '@/assets/up-arrow.svg'
+import downArrow from '@/assets/down-arrow.svg'
 let deckID = ref(null);
 const latestPlayedCard = ref<Card | null>(null);
 const latestPlayer = ref<Account | null>(null);
@@ -148,11 +161,11 @@ function handleCardScoring(card: Card) {
 
 // 將失敗的玩家設定成eliminated
 function handlePlayerEliminated(account: Account) {
-  const idx = gamePlayerList.findIndex(p => p.accountId === account.accountId);
-  if (idx !== -1) {
-    gamePlayerList[idx].status = 'eliminated';
-  }
-  nextPlayer();
+    const idx = gamePlayerList.findIndex(p => p.accountId === account.accountId);
+    if (idx !== -1) {
+        gamePlayerList[idx].status = 'eliminated';
+    }
+    nextPlayer();
 }
 
 // 處理牌對回合效果
