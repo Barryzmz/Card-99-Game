@@ -48,15 +48,33 @@ const emit = defineEmits<{
 
 let gameScore = ref(0);
 let latestEffect = ref('')
+let latestPlayer = ref('')
 
 // 處理分數功能
-function handleScore(card: Card) {
-    const translatedValue = parseInt(translateCardsValue(card.score))
-    const lastGameScore = gameScore.value
-    gameScore.value = translatedValue + lastGameScore
+function handleScore(card: Card, player: string) {
+    latestPlayer.value =  player
+    handleEffectCard(card)
     handleCardEffectDiscription(card)
     emit('score-updated', gameScore.value)
-    console.log('origin Score:', lastGameScore, 'Card value:', translatedValue, 'Score:', gameScore.value)
+}
+
+// 處理功能牌
+function handleEffectCard(card: Card) {
+    switch (card.effect) {
+        case 'set_score_to_ninetyNine':
+            gameScore.value = 99
+            break;
+
+        case 'reset_score':
+            gameScore.value = 0
+            break;
+
+        default:
+            const translatedValue = parseInt(translateCardsValue(card.score))
+            const lastGameScore = gameScore.value
+            gameScore.value = translatedValue + lastGameScore
+            break;
+    }
 }
 
 // 處理Effect 描述
@@ -93,6 +111,7 @@ function handleCardEffectDiscription(card: Card) {
             latestEffect.value = `Add ${card.score}`
             break;
     }
+    console.log('effect:', latestPlayer.value, latestEffect.value, 'SCORE', gameScore.value)
 }
 
 defineExpose({
