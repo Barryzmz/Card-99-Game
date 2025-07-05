@@ -1,10 +1,14 @@
 <template>
-    <div class="d-flex align-items-center bg-light p-2 rounded">
-        <div class="text-start mx-1">
-            <img :src=avatar style="height: 50px;" />
+    <div class="d-flex justify-content-start align-items-center gap-4 mx-4 pb-2">
+        <div class="d-flex align-items-center bg-light p-2 rounded"
+            :class="{ 'disabled-player': props.playerInfo.status === 'eliminated' }">
+                <img :src=avatar  style="height: 50px;" />
+                <div class="text-start mx-2">
+                    <h5 class="mb-1">{{ props.playerInfo.name }}</h5>
+                </div>
         </div>
-        <div class="text-start">
-            <h4>{{ props.playerInfo.name }}</h4>
+        <div v-if="props.isActive" class="h-100 d-flex align-items-center">
+            <img :src=pointer alt="arrow" style="height: 50px;">
         </div>
     </div>
 </template>
@@ -13,6 +17,7 @@ import { onMounted, ref, watch, computed } from 'vue'
 import { analyszeBestPlay, getRandomAccount } from '@/utils/cardUtils'
 import type { Card, Account } from '@/types/baseType'
 import avatar from '@/assets/avator.svg'
+import pointer from '@/assets/left-arrow.svg'
 const cardList = ref<Card[]>([]);
 const selectedCardIndex = ref<number | null>(null)
 const latestPlayedCard = ref<Card | null>(null);
@@ -67,7 +72,8 @@ function handleCardScoring(card: Card) {
 
 // 告知賽局這個玩家沒牌可出所以出局
 function reportPlayerEliminated(player: Account) {
-  emit('reportPlayerEliminated', player)
+    props.playerInfo.status = 'eliminated'
+    emit('reportPlayerEliminated', player)
 }
 
 // 出牌
@@ -149,5 +155,9 @@ onMounted(() => {
 .card-raised {
     transform: translateY(-20px);
     transition: transform 0.2s ease;
+}
+.disabled-player {
+  filter: grayscale(100%);
+  opacity: 0.6;
 }
 </style>
