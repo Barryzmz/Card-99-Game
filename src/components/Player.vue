@@ -1,22 +1,34 @@
 <template>
-    <div class="d-flex justify-content-center align-items-start gap-4 mt-3 mb-0 pb-2">
-        <div class="text-white" id="playerOne">
-            <div class="d-flex flex-row gap-2">
-                <div v-for="(card, index) in cardList" :key="card.cardValue.code" @click="toggleCardSelection(index)"
-                    :class="{ 'card-raised': selectedCardIndex === index }" style="cursor: pointer;">
-                    <img :src="card.cardValue?.images?.png" style="height: 180px;" />
+    <div class="position-relative d-flex justify-content-center align-items-start  mt-3 mb-0 pb-2"
+        :class="{ 'bg-warning': props.isActive }">
+        <div v-if="props.isActive" class="position-absolute top-0"
+            style="left: 10%; transform: translate(-50%, -70%); z-index: 10;">
+            <span class="badge bg-white text-dark fs-2 py-3 px-4 rounded-pill">
+                請出牌
+            </span>
+        </div>
+        <div class="row">
+            <div class="col-10 text-white">
+                <div class="d-flex flex-row gap-2 p-5">
+                    <div v-for="(card, index) in cardList" :key="card.cardValue.code"
+                        @click="toggleCardSelection(index)" :class="{ 'card-raised': selectedCardIndex === index }"
+                        style="cursor: pointer;">
+                        <img :src="card.cardValue?.images?.png" style="height: 180px;" />
+                    </div>
                 </div>
             </div>
+            <div class="col-2 d-flex align-items-center">
+                <button type="button" class="btn btn-primary my-3 fs-4 px-4 py-2"
+                    :disabled="selectedCardIndex === null || !isActive" @click="playCard">
+                    Play
+                </button>
+            </div>
         </div>
-        <div class="d-flex flex-column">
-            <button type="button" class="btn btn-primary btn-lg my-2"
-                :disabled="selectedCardIndex === null || !isActive" @click="playCard">Play</button>
-        </div>
-        <AddOrSubEffectDialog :visible="showAddOrSubDialog" :category="categoryAddOrSubDialog"
-            @confirm="handleAddOrSubEffect" />
-        <DesignateEffectDialog :visible="showDesignateDialog" :otherPlayerList="otherPlayerList"
-            @confirm="handleDesignateEffect" />
     </div>
+    <AddOrSubEffectDialog :visible="showAddOrSubDialog" :category="categoryAddOrSubDialog"
+        @confirm="handleAddOrSubEffect" />
+    <DesignateEffectDialog :visible="showDesignateDialog" :otherPlayerList="otherPlayerList"
+        @confirm="handleDesignateEffect" />
 </template>
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from 'vue'
@@ -41,12 +53,12 @@ const props = defineProps<{
 }>()
 
 watch(
-  () => props.isActive,
-  (active) => {
-    if (active) {
-      AnalysisPlayCard()
+    () => props.isActive,
+    (active) => {
+        if (active) {
+            AnalysisPlayCard()
+        }
     }
-  }
 )
 
 const emit = defineEmits<{
@@ -55,8 +67,8 @@ const emit = defineEmits<{
 
 // 算出距離max score的的數值
 const remainingToMaxScore = computed(() => {
-  const result = 99 - props.gameScore;
-  return result;
+    const result = 99 - props.gameScore;
+    return result;
 });
 
 defineExpose({ receiveCards })
@@ -68,10 +80,10 @@ function handleCardScoring(card: Card) {
 
 // 處理出牌邏輯
 async function AnalysisPlayCard() {
-  const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value )
-  if (bestCard == null){
-    console.log(props.playerInfo.name, '<<<<<lose>>>>>')
-  }
+    const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value)
+    if (bestCard == null) {
+        console.log(props.playerInfo.name, '<<<<<lose>>>>>')
+    }
 }
 
 // 出牌
