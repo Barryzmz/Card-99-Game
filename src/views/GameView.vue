@@ -91,15 +91,17 @@ async function getDeck() {
 // 一開始抽五張牌
 async function getInitCards() {
     try {
-        // 給每一位玩家發牌
-        allPlayerRefs.value.forEach(async child => {
+        for (const child of allPlayerRefs.value) {
+            if (!child) continue
+
             const result = await axios.get(
                 `https://www.deckofcardsapi.com/api/deck/${deckID.value}/draw/?count=5`
             )
             const initCardList: Card[] = (result.data.cards as CardValue[])
                 .map(cv => convertToCard(cv))
-            child?.receiveCards([...initCardList])
-        })
+
+            child.receiveCards([...initCardList])
+        }
     } catch (error) {
         console.error('getInitCards error:', error)
     }
