@@ -19,9 +19,9 @@
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import type { Card, Account } from '@/types/baseType'
-import { translateCardsValue, translateCardsSuit } from '@/utils/cardUtils'
+import { translateCardsValue, translateCardsSuit, analyszeBestPlay } from '@/utils/cardUtils'
 import AddOrSubEffectDialog from '@/components/AddOrSubEffectDialog.vue'
 import DesignateEffectDialog from '@/components/DesignateEffectDialog.vue'
 const cardList = ref<Card[]>([]);
@@ -40,15 +40,38 @@ const props = defineProps<{
     gameScore: number
 }>()
 
+watch(
+  () => props.isActive,
+  (active) => {
+    if (active) {
+      AnalysisPlayCard()
+    }
+  }
+)
+
 const emit = defineEmits<{
     (e: 'playCard', card: Card): void
 }>()
+
+// 算出距離max score的的數值
+const remainingToMaxScore = computed(() => {
+  const result = 99 - props.gameScore;
+  return result;
+});
 
 defineExpose({ receiveCards })
 
 // 將卡牌傳出去
 function handleCardScoring(card: Card) {
     emit('playCard', card)
+}
+
+// 處理出牌邏輯
+async function AnalysisPlayCard() {
+  const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value )
+  if (bestCard == null){
+    console.log(props.playerInfo.name, '<<<<<lose>>>>>')
+  }
 }
 
 // 出牌

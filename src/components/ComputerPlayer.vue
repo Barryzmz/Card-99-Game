@@ -9,17 +9,14 @@
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
+import { analyszeBestPlay, getRandomAccount } from '@/utils/cardUtils'
 import type { Card, Account } from '@/types/baseType'
 import avatar from '@/assets/avator.svg'
 const cardList = ref<Card[]>([]);
 const selectedCardIndex = ref<number | null>(null)
 const latestPlayedCard = ref<Card | null>(null);
-const showAddOrSubDialog = ref(false)
-const categoryAddOrSubDialog = ref('')
-const showDesignateDialog = ref(false)
 const otherPlayerList = ref<Account[]>([])
-const PlayerInfo: Account | null = null;
 const props = defineProps<{
     playerList: Account[]
     playerInfo: Account
@@ -31,7 +28,6 @@ watch(
     () => props.isActive,
     (active) => {
         if (active) {
-            // 2. 一旦变成 true，就自动出牌
             AnalysisPlayCard()
         }
     }
@@ -41,13 +37,24 @@ const emit = defineEmits<{
     (e: 'playCard', card: Card): void
 }>()
 
+// 算出距離max score的的數值
+const remainingToMaxScore = computed(() => {
+  const result = 99 - props.gameScore;
+  return result;
+});
+
 defineExpose({ receiveCards })
 
 // 處理出牌邏輯
 async function AnalysisPlayCard() {
     //先等2秒再出牌
     await new Promise(resolve => setTimeout(resolve, 2000))
-    selectedCardIndex.value = 0
+    const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value )
+    if (bestCard == null){
+        console.log(props.playerInfo.name, '<<<<<lose>>>>>')
+        console.log(props.playerInfo.name,'`s card List',cardList.value )
+    }
+    selectedCardIndex.value = cardList.value.findIndex(card => card === bestCard)
     playCard()
 }
 
@@ -59,7 +66,7 @@ function handleCardScoring(card: Card) {
 // 出牌
 function playCard() {
     try {
-        if (selectedCardIndex.value === null) return
+        if (selectedCardIndex.value === null || selectedCardIndex.value ===-1 ) return
         latestPlayedCard.value = cardList.value[selectedCardIndex.value]
         handleCardEffect(latestPlayedCard.value)
     } catch (error) {
@@ -69,6 +76,8 @@ function playCard() {
 
 // 預處理功能牌
 function handleCardEffect(card: Card) {
+    if (card === null) return
+
     if (selectedCardIndex.value !== null) {
         cardList.value.splice(selectedCardIndex.value, 1);
         selectedCardIndex.value = null;
@@ -76,19 +85,18 @@ function handleCardEffect(card: Card) {
 
     switch (card.effect) {
         case 'add_or_sub_twenty':
-            categoryAddOrSubDialog.value = 'add_or_sub_twenty'
             handleAddOrSubEffect(-1);
             break;
 
         case 'add_or_sub_ten':
-            categoryAddOrSubDialog.value = 'add_or_sub_ten'
             handleAddOrSubEffect(-1);
             break;
 
         case 'designate_next_player':
-            otherPlayerList.value = props.playerList.filter(p => p.accountId !== PlayerInfo?.accountId);
-            handleDesignateEffect(otherPlayerList.value[0].accountId, otherPlayerList.value[0].name)
-            showDesignateDialog.value = true;
+            otherPlayerList.value = props.playerList.filter(p => p.accountId !== props.playerInfo.accountId);
+            const designatePlayer = getRandomAccount(otherPlayerList.value)
+            if (designatePlayer !== null)
+                handleDesignateEffect(designatePlayer.accountId, designatePlayer.name)
             break;
 
         default:
@@ -103,7 +111,6 @@ function handleAddOrSubEffect(parameter: number) {
         const originScore = latestPlayedCard.value.score;
         latestPlayedCard.value.score = originScore * parameter;
         handleCardScoring(latestPlayedCard.value);
-        showAddOrSubDialog.value = false;
     }
 }
 
@@ -113,7 +120,6 @@ function handleDesignateEffect(accountId: string, name: string) {
     latestPlayedCard.value.designate.accountId = accountId;
     latestPlayedCard.value.designate.name = name;
     handleCardScoring(latestPlayedCard.value);
-    showDesignateDialog.value = false;
   }
 }
 
