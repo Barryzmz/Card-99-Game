@@ -116,7 +116,7 @@ function handleCardEffect(card: Card) {
             break;
 
         case 'designate_next_player':
-            otherPlayerList.value = props.playerList.filter(p => p.accountId !== props.playerInfo.accountId);
+            otherPlayerList.value = props.playerList.filter(p => p.accountId !== props.playerInfo.accountId && p.status !== 'eliminated');
             showDesignateDialog.value = true;
             break;
 
