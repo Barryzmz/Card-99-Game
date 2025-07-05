@@ -4,6 +4,10 @@
             <div class="flex-grow-1 bg-white text-dark p-3 rounded">
                 <h1 class="m-0">Score: {{ gameScore }}</h1>
             </div>
+            <div class="bg-white text-dark p-3 rounded d-flex align-items-center justify-content-center"
+                style="min-width: 50px;">
+                <h2 class="fw-bold m-0">Play Count: {{ playCount }}</h2>
+            </div>
         </div>
         <div class="d-flex gap-2 align-items-stretch">
             <div class="bg-white p-3 rounded d-flex flex-column justify-content-center align-items-center"
@@ -49,6 +53,7 @@ const emit = defineEmits<{
 let gameScore = ref(0);
 let latestEffect = ref('')
 let latestPlayer = ref('')
+let playCount = ref(0)
 
 // 處理分數功能
 function handleScore(card: Card, player: string) {
@@ -56,6 +61,7 @@ function handleScore(card: Card, player: string) {
     handleEffectCard(card)
     handleCardEffectDiscription(card)
     emit('score-updated', gameScore.value)
+    playCount.value++
 }
 
 // 處理功能牌
