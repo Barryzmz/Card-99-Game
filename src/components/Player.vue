@@ -73,7 +73,7 @@ const remainingToMaxScore = computed(() => {
     return result;
 });
 
-defineExpose({ receiveCards })
+defineExpose({ receiveCards, getHandCardsCount })
 
 // 將卡牌傳出去
 function handleCardScoring(card: Card) {
@@ -159,6 +159,11 @@ function receiveCards(cards: Card[]) {
         cardList.value.push(c);
     });
     sortCardList(cardList.value)
+}
+
+// 告知賽局目前手牌數量
+function getHandCardsCount(): number {
+  return cardList.value.length
 }
 
 // 排序CardList

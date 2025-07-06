@@ -1,11 +1,18 @@
 <template>
     <div class="d-flex justify-content-start align-items-center gap-4 mx-4 pb-2">
-        <div class="d-flex align-items-center bg-light p-2 rounded"
+        <div class="d-flex flex-column bg-light p-2 rounded"
             :class="{ 'disabled-player': props.playerInfo.status === 'eliminated' }">
-                <img :src=avatar style="height: 50px;" />
-                <div class="text-start mx-2">
-                    <h5 class="mb-1">{{ props.playerInfo.name }}</h5>
+            <div class="d-flex align-items-center mb-2">
+                <img :src="avatar" style="height: 50px;" />
+                <div class="text-start ms-2">
+                    <h5 class="mb-0">{{ props.playerInfo.name }}</h5>
                 </div>
+            </div>
+            <div class="mt-auto text-center">
+                <small class="text-secondary">
+                    Hand cards: {{ cardList.length }}
+                </small>
+            </div>
         </div>
         <div v-if="props.isActive" class="h-100 d-flex align-items-center">
             <img :src=pointer alt="arrow" style="height: 50px;">
@@ -32,8 +39,8 @@ const props = defineProps<{
 
 // 算出距離max score的的數值
 const remainingToMaxScore = computed(() => {
-  const result = 99 - props.gameScore;
-  return result;
+    const result = 99 - props.gameScore;
+    return result;
 });
 
 watch(
@@ -50,11 +57,11 @@ const emit = defineEmits<{
     (e: 'reportPlayerEliminated', playerInfo: Account): void
 }>()
 
-defineExpose({ receiveCards })
+defineExpose({ receiveCards, getHandCardsCount })
 
 // 跳出該玩家已經出局的訊息通知
-function notifyPlayerEliminatedByToast(playerName: string): void{
-  toast(`${playerName} is eliminated`);
+function notifyPlayerEliminatedByToast(playerName: string): void {
+    toast(`${playerName} is eliminated`);
 }
 
 // 處理出牌邏輯
@@ -64,7 +71,7 @@ async function AnalysisPlayCard() {
     const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value)
     if (bestCard == null) {
         console.log(props.playerInfo.name, '<<<<<lose>>>>>')
-        console.log(props.playerInfo.name,"'s cardList", cardList.value)
+        console.log(props.playerInfo.name, "'s cardList", cardList.value)
         reportPlayerEliminated(props.playerInfo)
     }
     selectedCardIndex.value = cardList.value.findIndex(card => card === bestCard)
@@ -86,7 +93,7 @@ function reportPlayerEliminated(player: Account) {
 // 出牌
 function playCard() {
     try {
-        if (selectedCardIndex.value === null || selectedCardIndex.value === -1 ) return
+        if (selectedCardIndex.value === null || selectedCardIndex.value === -1) return
         latestPlayedCard.value = cardList.value[selectedCardIndex.value]
         handleCardEffect(latestPlayedCard.value)
     } catch (error) {
@@ -136,11 +143,11 @@ function handleAddOrSubEffect(parameter: number) {
 
 // 預處理指定玩家功能
 function handleDesignateEffect(accountId: string, name: string) {
-  if (latestPlayedCard.value !== null) {
-    latestPlayedCard.value.designate.accountId = accountId;
-    latestPlayedCard.value.designate.name = name;
-    handleCardScoring(latestPlayedCard.value);
-  }
+    if (latestPlayedCard.value !== null) {
+        latestPlayedCard.value.designate.accountId = accountId;
+        latestPlayedCard.value.designate.name = name;
+        handleCardScoring(latestPlayedCard.value);
+    }
 }
 
 // 接收發牌
@@ -148,6 +155,11 @@ function receiveCards(cards: Card[]) {
     cards?.forEach(c => {
         cardList.value.push(c);
     });
+}
+
+// 告知賽局目前手牌數量
+function getHandCardsCount(): number {
+    return cardList.value.length
 }
 
 onMounted(() => {
@@ -163,8 +175,9 @@ onMounted(() => {
     transform: translateY(-20px);
     transition: transform 0.2s ease;
 }
+
 .disabled-player {
-  filter: grayscale(100%);
-  opacity: 0.6;
+    filter: grayscale(100%);
+    opacity: 0.6;
 }
 </style>
