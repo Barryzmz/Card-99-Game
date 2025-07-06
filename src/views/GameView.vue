@@ -50,6 +50,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 import type { CardValue, Card, Account } from '@/types/baseType'
 import { convertToCard } from '@/utils/cardUtils'
 import ScorePanel from '@/components/ScorePanel.vue'
@@ -57,6 +58,8 @@ import PlayerArea from '@/components/Player.vue'
 import ComputerPlayer from '@/components/ComputerPlayer.vue'
 import upArrow from '@/assets/up-arrow.svg'
 import downArrow from '@/assets/down-arrow.svg'
+import nyanCat from '@/assets/nyan-cat.gif'
+let gameOver = ref(true);
 let deckID = ref(null);
 let playCount = ref(0)
 const latestPlayedCard = ref<Card | null>(null);
@@ -88,6 +91,12 @@ const maxHandCardCountRoundSetting = {
   nextRound: 5
 }
 
+// 檢查是否已經獲勝
+function checkPlayerWin(): boolean {
+  const alive = gamePlayerList.filter(p => p.status !== 'eliminated');
+  return alive.length === 1 && alive[0].accountId === 'player0';
+}
+
 // 處理誰是下一位玩家
 function nextPlayer() {
     const len = allPlayerRefs.value.length
@@ -97,6 +106,18 @@ function nextPlayer() {
         if (++attempts > len) {
             console.warn('All players are out')
             return
+        }
+
+        // 判斷賽局是否結束
+        if(gameOver.value){
+            console.log('Game Over')
+            return
+        }
+
+        // 判斷電腦玩家是否都出局，玩家獲得勝利
+        if(checkPlayerWin()){
+            console.log('win')
+            notifyPlayerWin()
         }
 
         newIndex = isReversed.value
@@ -114,6 +135,7 @@ function nextPlayer() {
 // 洗牌
 async function getDeck() {
     try {
+        gameOver.value = false;
         if (deckID.value == null) {
             const result = await axios.get("https://www.deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1");
             deckID.value = result.data.deck_id;
@@ -182,7 +204,8 @@ function handlePlayerEliminated(account: Account) {
     if (idx !== -1) {
         gamePlayerList[idx].status = 'eliminated';
     }
-    nextPlayer();
+    gameOver.value = true
+    notifyPlayerLose()
 }
 
 // 處理牌對回合效果
@@ -250,6 +273,51 @@ function getPlayerNames() {
 // 設定最一開始的玩家
 function setInitTurn() {
     activeAccount.value = gamePlayerList[activeIndex.value];
+}
+
+const notifyPlayerWin = () => {
+  Swal.fire({
+    title: "Winner winner chicken dinner.",
+    width: 600,
+    padding: "3em",
+    color: "#716add",
+    showDenyButton: true,
+    confirmButtonText: 'Back to Home',
+    denyButtonText: `Play Again`,
+    backdrop: `
+      rgba(0,0,123,0.4)
+      url("${nyanCat}")
+      left top
+      no-repeat 
+    `
+  }).then((result) => {
+    if (result.isConfirmed) {
+      console.log('saved')
+    } else if (result.isDenied) {
+      console.log('discarded')
+    }
+  });
+}
+
+const notifyPlayerLose = () => {
+  Swal.fire({
+    title: 'You Lose',
+    showDenyButton: true,
+    confirmButtonText: 'Back to Home',
+    denyButtonText: `Play Again`,
+    customClass: {
+      confirmButton: 'btn btn btn-primary me-2',
+      denyButton: 'btn btn btn-primary'
+    },
+    buttonsStyling: false
+  })
+  .then((result) => {
+    if (result.isConfirmed) {
+      console.log('saved')
+    } else if (result.isDenied) {
+      console.log('discarded')
+    }
+  })
 }
 
 onMounted(async () => {
