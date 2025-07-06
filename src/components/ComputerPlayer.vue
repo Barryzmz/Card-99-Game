@@ -54,7 +54,7 @@ watch(
 
 const emit = defineEmits<{
     (e: 'playCard', card: Card): void
-    (e: 'reportPlayerEliminated', playerInfo: Account): void
+    (e: 'report-computerPlayer-eliminated', playerInfo: Account): void
 }>()
 
 defineExpose({ receiveCards, getHandCardsCount })
@@ -87,7 +87,7 @@ function handleCardScoring(card: Card) {
 function reportPlayerEliminated(player: Account) {
     props.playerInfo.status = 'eliminated'
     notifyPlayerEliminatedByToast(props.playerInfo.name)
-    emit('reportPlayerEliminated', player)
+    emit('report-computerPlayer-eliminated', player)
 }
 
 // 出牌

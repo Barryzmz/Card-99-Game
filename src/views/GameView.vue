@@ -17,6 +17,7 @@
                     :gameScore="gameScore"
                     @playCard="handleCardScoring"
                     @reportPlayerEliminated="handlePlayerEliminated"
+                    @report-computerPlayer-eliminated="handleComputerPlayerEliminated"
                 />
             </div>
             <div class="col-9 p-0">
@@ -40,6 +41,7 @@
                     :playerList="playerList"
                     :gameScore="gameScore"
                     @playCard="handleCardScoring"
+                    @report-Player-eliminated="handlePlayerEliminated"
                 />
             </div>
         </div>
@@ -165,6 +167,15 @@ function handleCardScoring(card: Card) {
     handleEffectCard(card);
 }
 
+// 將失敗的電腦玩家設定成eliminated
+function handleComputerPlayerEliminated(account: Account) {
+  const idx = gamePlayerList.findIndex(p => p.accountId === account.accountId);
+  if (idx !== -1) {
+    gamePlayerList[idx].status = 'eliminated';
+  }
+  nextPlayer();
+}
+
 // 將失敗的玩家設定成eliminated
 function handlePlayerEliminated(account: Account) {
     const idx = gamePlayerList.findIndex(p => p.accountId === account.accountId);
@@ -202,7 +213,7 @@ function calcMaxCurrentHandLimit(playCount: number, firstRound: number, nextRoun
   if (playCount <= firstRound) {
     return originHandCardsCount;
   }
-  const extra = Math.floor((playCount - firstRound) / nextRound)+1 ;
+  const extra = Math.floor((playCount - firstRound) / nextRound) + 1 ;
   const limit = originHandCardsCount - extra;
   return Math.max(limit, 2);
 }
