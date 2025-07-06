@@ -30,6 +30,7 @@
                             :currentPlayer="activeAccount?.name ?? null" 
                             :latestPlayedCard="latestPlayedCard"
                             @score-updated="gameScore = $event"
+                            @playCount-updated="playCount = $event"
                         />
                     </div>
                 </div>
@@ -55,6 +56,7 @@ import ComputerPlayer from '@/components/ComputerPlayer.vue'
 import upArrow from '@/assets/up-arrow.svg'
 import downArrow from '@/assets/down-arrow.svg'
 let deckID = ref(null);
+let playCount = ref(0)
 const latestPlayedCard = ref<Card | null>(null);
 const latestPlayer = ref<Account | null>(null);
 let gameScore = ref(0);
@@ -79,6 +81,10 @@ const allPlayerRefs = computed(() => [
     playerRef.value,
     computerPlayerRef.value,
 ])
+const maxHandCardCountRoundSetting = {
+  firstRound: 10,
+  nextRound: 5
+}
 
 // 處理誰是下一位玩家
 function nextPlayer() {
@@ -190,8 +196,25 @@ function handleEffectCard(card: Card) {
     }
 }
 
+// 計算目前輪次最高手牌上限
+function calcMaxCurrentHandLimit(playCount: number, firstRound: number, nextRound: number): number {
+  const originHandCardsCount = 5
+  if (playCount <= firstRound) {
+    return originHandCardsCount;
+  }
+  const extra = Math.floor((playCount - firstRound) / nextRound)+1 ;
+  const limit = originHandCardsCount - extra;
+  return Math.max(limit, 2);
+}
+
 // 發新一張牌到手牌
-async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => void }) {
+async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => void; getHandCardsCount: () => number;}) {
+    const handCardsCount = targetInstance.getHandCardsCount();
+    const MaxHandCardCount = calcMaxCurrentHandLimit(playCount.value, maxHandCardCountRoundSetting.firstRound, maxHandCardCountRoundSetting.nextRound)
+    if (MaxHandCardCount <= handCardsCount) {
+    return
+    }
+
     async function tryDraw(count = 1) {
         const res = await axios.get(
             `https://www.deckofcardsapi.com/api/deck/${deckID.value}/draw/?count=${count}`
