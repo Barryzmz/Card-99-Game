@@ -2,7 +2,7 @@
     <div class="d-flex justify-content-start align-items-center gap-4 mx-4 pb-2">
         <div class="d-flex align-items-center bg-light p-2 rounded"
             :class="{ 'disabled-player': props.playerInfo.status === 'eliminated' }">
-                <img :src=avatar  style="height: 50px;" />
+                <img :src=avatar style="height: 50px;" />
                 <div class="text-start mx-2">
                     <h5 class="mb-1">{{ props.playerInfo.name }}</h5>
                 </div>
@@ -18,6 +18,7 @@ import { analyszeBestPlay, getRandomAccount } from '@/utils/cardUtils'
 import type { Card, Account } from '@/types/baseType'
 import avatar from '@/assets/avator.svg'
 import pointer from '@/assets/left-arrow.svg'
+import { toast } from 'vue3-toastify';
 const cardList = ref<Card[]>([]);
 const selectedCardIndex = ref<number | null>(null)
 const latestPlayedCard = ref<Card | null>(null);
@@ -28,6 +29,12 @@ const props = defineProps<{
     isActive: boolean
     gameScore: number
 }>()
+
+// 算出距離max score的的數值
+const remainingToMaxScore = computed(() => {
+  const result = 99 - props.gameScore;
+  return result;
+});
 
 watch(
     () => props.isActive,
@@ -43,20 +50,19 @@ const emit = defineEmits<{
     (e: 'reportPlayerEliminated', playerInfo: Account): void
 }>()
 
-// 算出距離max score的的數值
-const remainingToMaxScore = computed(() => {
-  const result = 99 - props.gameScore;
-  return result;
-});
-
 defineExpose({ receiveCards })
+
+// 跳出該玩家已經出局的訊息通知
+function notifyPlayerEliminatedByToast(playerName: string): void{
+  toast(`${playerName} is eliminated`);
+}
 
 // 處理出牌邏輯
 async function AnalysisPlayCard() {
     //先等2秒再出牌
     await new Promise(resolve => setTimeout(resolve, 2000))
-    const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value )
-    if (bestCard == null){
+    const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value)
+    if (bestCard == null) {
         console.log(props.playerInfo.name, '<<<<<lose>>>>>')
         console.log(props.playerInfo.name,"'s cardList", cardList.value)
         reportPlayerEliminated(props.playerInfo)
@@ -73,13 +79,14 @@ function handleCardScoring(card: Card) {
 // 告知賽局這個玩家沒牌可出所以出局
 function reportPlayerEliminated(player: Account) {
     props.playerInfo.status = 'eliminated'
+    notifyPlayerEliminatedByToast(props.playerInfo.name)
     emit('reportPlayerEliminated', player)
 }
 
 // 出牌
 function playCard() {
     try {
-        if (selectedCardIndex.value === null || selectedCardIndex.value ===-1 ) return
+        if (selectedCardIndex.value === null || selectedCardIndex.value === -1 ) return
         latestPlayedCard.value = cardList.value[selectedCardIndex.value]
         handleCardEffect(latestPlayedCard.value)
     } catch (error) {
