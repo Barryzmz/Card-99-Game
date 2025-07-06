@@ -48,6 +48,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'score-updated', newScore: number): void
+    (e: 'playCount-updated', playCount: number): void
 }>()
 
 let gameScore = ref(0);
@@ -62,6 +63,7 @@ function handleScore(card: Card, player: string) {
     handleCardEffectDiscription(card)
     emit('score-updated', gameScore.value)
     playCount.value++
+    emit('playCount-updated', playCount.value)
 }
 
 // 處理功能牌
