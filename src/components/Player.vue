@@ -11,8 +11,10 @@
             <div class="col-10 text-white">
                 <div class="d-flex flex-row gap-2 p-5">
                     <div v-for="(card, index) in cardList" :key="card.cardValue.code"
-                        @click="toggleCardSelection(index)" :class="{ 'card-raised': selectedCardIndex === index }"
-                        style="cursor: pointer;">
+                        @click="toggleCardSelection(index)" :class="{
+                            'card-raised': selectedCardIndex === index,
+                            'card-disabled': isCardDisabled(card)
+                        }" style="cursor: pointer;">
                         <img :src="card.cardValue?.images?.png" style="height: 180px;" />
                     </div>
                 </div>
@@ -25,7 +27,7 @@
             </div>
         </div>
     </div>
-    <AddOrSubEffectDialog :visible="showAddOrSubDialog" :category="categoryAddOrSubDialog"
+    <AddOrSubEffectDialog :visible="showAddOrSubDialog" :category="categoryAddOrSubDialog" :gameScore="props.gameScore"
         @confirm="handleAddOrSubEffect" />
     <DesignateEffectDialog :visible="showDesignateDialog" :otherPlayerList="otherPlayerList"
         @confirm="handleDesignateEffect" />
@@ -84,6 +86,11 @@ async function AnalysisPlayCard() {
     if (bestCard == null) {
         console.log(props.playerInfo.name, '<<<<<lose>>>>>')
     }
+}
+
+// 判斷可出的手牌
+function isCardDisabled(card: Card): boolean {
+  return card.score > remainingToMaxScore.value && card.level == 1;
 }
 
 // 出牌
@@ -196,5 +203,10 @@ onMounted(() => {
 .card-raised {
     transform: translateY(-20px);
     transition: transform 0.2s ease;
+}
+
+.card-disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 </style>

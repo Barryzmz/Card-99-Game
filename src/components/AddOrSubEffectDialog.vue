@@ -4,7 +4,8 @@
         <div class="position-absolute start-50 top-25 translate-middle-x bg-white p-4 rounded shadow"
             style="width: 450px; z-index: 1051;">
             <h5 class="mb-3">{{ cardName }} Effect</h5>
-            <p class="mb-4">Do you want to add {{ cardValue }} or subtract {{ cardValue }} score?</p>
+            <p class="mb-1">Current Score: {{ props.gameScore }}</p>
+            <p class="mb-1">Do you want to add {{ cardValue }} or subtract {{ cardValue }} score?</p>
             <div class="d-flex justify-content-end gap-2">
                 <button class="btn btn-danger flex-fill" style="min-width: 120px;" @click="emitEffect(1)">
                     Add {{ cardValue }}
@@ -23,6 +24,7 @@ import { computed } from 'vue';
 const props = defineProps<{
     visible: boolean
     category: String
+    gameScore: number
 }>()
 
 const emit = defineEmits<{
@@ -48,11 +50,18 @@ const cardName = computed(() => {
 const cardValue = computed(() => {
     switch (props.category) {
         case 'add_or_sub_twenty':
-            return '20';
+            return 20;
         case 'add_or_sub_ten':
-            return '10';
+            return 10;
         default:
-            return '0';
+            return 0;
     }
 });
+
+const remainingToMaxScore = computed(() => {
+  const result = 99 - props.gameScore;
+  return result;
+});
+
+const isAddScoreAllowed = computed(() => remainingToMaxScore.value < cardValue.value)
 </script>
