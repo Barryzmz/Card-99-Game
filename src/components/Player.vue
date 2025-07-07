@@ -71,6 +71,7 @@ watch(
     (active) => {
         if (active) {
             AnalysisPlayCard()
+            checkCardSelectionAllow()
         }
     }
 )
@@ -213,6 +214,22 @@ function sortCardList(cardList: Card[]) {
 // 控制點擊選取
 function toggleCardSelection(index: number) {
     selectedCardIndex.value = selectedCardIndex.value === index ? null : index;
+}
+
+// 確定預先點擊的牌可以出牌
+function checkCardSelectionAllow() {
+    try {
+        if (selectedCardIndex.value === null) 
+            return
+
+        if (remainingToMaxScore.value <  cardList.value[selectedCardIndex.value].score && 
+            cardList.value[selectedCardIndex.value].level === 1)
+        {
+            selectedCardIndex.value = null
+        }
+    } catch (error) {
+        console.error('checkCardSelectionAllow failed:', error)
+    }
 }
 
 // 重置Player
