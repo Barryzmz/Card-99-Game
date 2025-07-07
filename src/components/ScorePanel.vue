@@ -121,8 +121,17 @@ function handleCardEffectDiscription(card: Card) {
     console.log('effect:', latestPlayer.value, latestEffect.value, 'SCORE', gameScore.value)
 }
 
+// 重置計分區塊
+function resetScorePanel() {
+    gameScore.value = 0;
+    latestEffect.value = '';
+    latestPlayer.value = '';
+    playCount.value = 0;
+}
+
 defineExpose({
-    handleScore
+    handleScore,
+    resetScorePanel
 })
 </script>
 

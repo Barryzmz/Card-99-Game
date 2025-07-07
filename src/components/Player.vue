@@ -74,7 +74,7 @@ const remainingToMaxScore = computed(() => {
     return result;
 });
 
-defineExpose({ receiveCards, getHandCardsCount })
+defineExpose({ receiveCards, getHandCardsCount, resetPlayer })
 
 // 將卡牌傳出去
 function handleCardScoring(card: Card) {
@@ -201,6 +201,17 @@ function sortCardList(cardList: Card[]) {
 // 控制點擊選取
 function toggleCardSelection(index: number) {
     selectedCardIndex.value = selectedCardIndex.value === index ? null : index;
+}
+
+// 重置Plaer
+function resetPlayer() {
+    cardList.value = [];
+    selectedCardIndex.value = null;
+    latestPlayedCard.value = null;
+    showAddOrSubDialog.value = false;
+    categoryAddOrSubDialog.value = '';
+    showDesignateDialog.value = false;
+    otherPlayerList.value = [];
 }
 
 onMounted(() => {

@@ -277,6 +277,33 @@ function setInitTurn() {
     activeAccount.value = gamePlayerList[activeIndex.value];
 }
 
+// 設定最一開始的玩家
+async function resetGame() {
+    gameOver.value = false;
+    deckID.value = null;
+    latestPlayedCard.value = null;
+    latestPlayer.value = null;
+    gameScore.value = 0;
+    activeIndex.value = 0;
+    activeAccount.value = null;
+    isReversed.value = false;
+    maxHandCardCount.value = 5;
+    scorePanelRef.value?.resetScorePanel();
+    for (const child of allPlayerRefs.value) {
+        if (!child) continue
+        child.resetPlayer();
+    }
+    otherPlayer.value.status = 'playing'
+    player.value.status = 'playing'
+    gamePlayerList.forEach(player => {
+        player.status = 'playing';
+    });
+    getPlayerNames();
+    await getDeck();
+    await getInitCards();
+    setInitTurn()
+}
+
 const notifyPlayerWin = () => {
   Swal.fire({
     title: "Winner winner chicken dinner.",
@@ -294,9 +321,10 @@ const notifyPlayerWin = () => {
     `
   }).then((result) => {
     if (result.isConfirmed) {
-      console.log('saved')
+        console.log('Confirmed')
     } else if (result.isDenied) {
-      console.log('discarded')
+        resetGame()
+        console.log('Denied')
     }
   });
 }
@@ -315,9 +343,10 @@ const notifyPlayerLose = () => {
   })
   .then((result) => {
     if (result.isConfirmed) {
-      console.log('saved')
+        console.log('Confirmed')
     } else if (result.isDenied) {
-      console.log('discarded')
+        resetGame()
+        console.log('Denied')
     }
   })
 }

@@ -57,7 +57,7 @@ const emit = defineEmits<{
     (e: 'report-computerPlayer-eliminated', playerInfo: Account): void
 }>()
 
-defineExpose({ receiveCards, getHandCardsCount })
+defineExpose({ receiveCards, getHandCardsCount, resetPlayer })
 
 // 跳出該玩家已經出局的訊息通知
 function notifyPlayerEliminatedByToast(playerName: string): void {
@@ -160,6 +160,14 @@ function receiveCards(cards: Card[]) {
 // 告知賽局目前手牌數量
 function getHandCardsCount(): number {
     return cardList.value.length
+}
+
+// 重置Plaer
+function resetPlayer() {
+    cardList.value = [];
+    selectedCardIndex.value = null;
+    latestPlayedCard.value = null;
+    otherPlayerList.value = [];
 }
 
 onMounted(() => {
