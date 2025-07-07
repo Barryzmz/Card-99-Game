@@ -77,7 +77,7 @@ export function determineCardAttributes(cardValue: CardValue): { score: number, 
 
 export function analyszeBestPlay(cardsList: Card[], score: number): Card | null {
   const level1 = cardsList
-  .filter(card => card.level === 1 && card.score < score)
+  .filter(card => card.level === 1 && card.score <= score)
   .sort((a, b) => b.score - a.score);
   if (level1.length > 0) return level1[0];
 
