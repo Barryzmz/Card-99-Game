@@ -10,13 +10,15 @@
                         <img :src="isReversed ? upArrow : downArrow" style="height: 40px;" alt="turn order arrow" />
                     </div>
                 </div>
-                <ComputerPlayer ref="computerPlayerRef"
-                    :isActive="activeAccount?.accountId === otherPlayer.accountId"
-                    :playerInfo="otherPlayer"
-                    :playerList="playerList"
+                <ComputerPlayer
+                    v-for="(bot, idx) in selectComputerList"
+                    :key="bot.accountId"
+                    ref="computerPlayersRef"
+                    :isActive="activeAccount?.accountId === bot.accountId"
+                    :playerInfo="bot"
+                    :playerList="gamePlayerList"
                     :gameScore="gameScore"
                     @playCard="handleCardScoring"
-                    @reportPlayerEliminated="handlePlayerEliminated"
                     @report-computerPlayer-eliminated="handleComputerPlayerEliminated"
                 />
             </div>
@@ -39,7 +41,7 @@
                 <PlayerArea ref="playerRef"
                     :isActive="activeAccount?.accountId === player.accountId"
                     :playerInfo="player"
-                    :playerList="playerList"
+                    :playerList="gamePlayerList"
                     :gameScore="gameScore"
                     @playCard="handleCardScoring"
                     @report-Player-eliminated="handlePlayerEliminated"
@@ -87,23 +89,22 @@ const {
     isReversed,
     maxHandCardCount
 } = toRefs(state)
-let otherPlayer = ref<Account>(
-    { idx: 1, avatar: '', accountId: 'player1', name: 'Player1', status: 'playing' },
-)
-let player = ref<Account>(
-    { idx: 0, avatar: '', accountId: 'player0', name: 'BarryZhuang', status: 'playing' }
-)
-let playerList: Account[] = []
-const gamePlayerList: Account[] = [
-    { idx: 0, avatar: '', accountId: 'player0', name: 'BarryZhuang', status: 'playing' },
-    { idx: 1, avatar: '', accountId: 'player1', name: 'Player1', status: 'playing' }
+let player: Account = { idx: 0, avatar: '', accountId: 'player0', name: 'BarryZhuang', status: 'playing' }
+const computerList : Account[] = [
+    { idx: 1, avatar: '', accountId: 'player1', name: 'Bot A', status: 'playing' },
+    { idx: 2, avatar: '', accountId: 'player2', name: 'Bot B', status: 'playing' },
+    { idx: 3, avatar: '', accountId: 'player3', name: 'Bot C', status: 'playing' },
+    { idx: 4, avatar: '', accountId: 'player4', name: 'Bot D', status: 'playing' },
+    { idx: 5, avatar: '', accountId: 'player5', name: 'Bot E', status: 'playing' }
 ]
+let gamePlayerList: Account[] = []
+let selectComputerList= ref<Account[]>([])
 const scorePanelRef = ref()
-const computerPlayerRef = ref<InstanceType<typeof ComputerPlayer> | null>(null)
+const computerPlayersRef = ref<InstanceType<typeof ComputerPlayer>[]>([])
 const playerRef = ref<InstanceType<typeof PlayerArea> | null>(null)
 const allPlayerRefs = computed(() => [
     playerRef.value,
-    computerPlayerRef.value,
+    ...computerPlayersRef.value,
 ])
 const maxHandCardCountRoundSetting = {
     firstRound: 10,
@@ -286,7 +287,8 @@ async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => voi
 
 // 把使用者加入遊戲順序清單
 function getPlayerNames() {
-    playerList = [...gamePlayerList];
+    selectComputerList.value = computerList.slice(0, 3)
+    gamePlayerList = [ player, ...selectComputerList.value ]
 }
 
 // 設定最一開始的玩家
@@ -302,8 +304,6 @@ async function resetGame() {
         if (!child) continue
         child.resetPlayer();
     }
-    otherPlayer.value.status = 'playing'
-    player.value.status = 'playing'
     gamePlayerList.forEach(player => {
         player.status = 'playing';
     });
