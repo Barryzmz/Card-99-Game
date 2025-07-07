@@ -86,9 +86,8 @@ function handleEffectCard(card: Card) {
             break;
 
         default:
-            const translatedValue = parseInt(translateCardsValue(card.score))
-            const lastGameScore = gameScore.value
-            gameScore.value = translatedValue + lastGameScore
+            const result = gameScore.value + parseInt(translateCardsValue(card.score))
+            gameScore.value = Math.max(result, 0)
             break;
     }
 }
