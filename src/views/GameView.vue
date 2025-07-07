@@ -49,7 +49,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { reactive, toRefs, onMounted, ref, computed } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import type { CardValue, Card, Account } from '@/types/baseType'
@@ -60,15 +60,35 @@ import ComputerPlayer from '@/components/ComputerPlayer.vue'
 import upArrow from '@/assets/up-arrow.svg'
 import downArrow from '@/assets/down-arrow.svg'
 import nyanCat from '@/assets/nyan-cat.gif'
-let gameOver = ref(true);
-let deckID = ref(null);
-let playCount = ref(0)
-const latestPlayedCard = ref<Card | null>(null);
-const latestPlayer = ref<Account | null>(null);
-let gameScore = ref(0);
-const scorePanelRef = ref()
+function createGameState() {
+    return {
+        gameOver: false as boolean,
+        deckID: null as string | null,
+        playCount: 0 as number,
+        latestPlayedCard: null as Card | null,
+        latestPlayer: null as Account | null,
+        gameScore: 0 as number,
+        activeIndex: 0 as number,
+        activeAccount: null as Account | null,
+        isReversed: false as boolean,
+        maxHandCardCount: 5 as number
+    }
+}
+const state = reactive(createGameState())
+const {
+    gameOver,
+    deckID,
+    playCount,
+    latestPlayedCard,
+    latestPlayer,
+    gameScore,
+    activeIndex,
+    activeAccount,
+    isReversed,
+    maxHandCardCount
+} = toRefs(state)
 let otherPlayer = ref<Account>(
-    { idx: 1, avatar: '', accountId: 'player1', name: 'Player1_Name', status: 'playing' },
+    { idx: 1, avatar: '', accountId: 'player1', name: 'Player1', status: 'playing' },
 )
 let player = ref<Account>(
     { idx: 0, avatar: '', accountId: 'player0', name: 'BarryZhuang', status: 'playing' }
@@ -76,27 +96,24 @@ let player = ref<Account>(
 let playerList: Account[] = []
 const gamePlayerList: Account[] = [
     { idx: 0, avatar: '', accountId: 'player0', name: 'BarryZhuang', status: 'playing' },
-    { idx: 1, avatar: '', accountId: 'player1', name: 'Player1_Name', status: 'playing' }
+    { idx: 1, avatar: '', accountId: 'player1', name: 'Player1', status: 'playing' }
 ]
+const scorePanelRef = ref()
 const computerPlayerRef = ref<InstanceType<typeof ComputerPlayer> | null>(null)
 const playerRef = ref<InstanceType<typeof PlayerArea> | null>(null)
-const activeIndex = ref(0)
-const activeAccount = ref<Account | null>(null);
-const isReversed = ref(false)
 const allPlayerRefs = computed(() => [
     playerRef.value,
     computerPlayerRef.value,
 ])
-const maxHandCardCount = ref(5)
 const maxHandCardCountRoundSetting = {
-  firstRound: 10,
-  nextRound: 5
+    firstRound: 10,
+    nextRound: 5
 }
 
 // 檢查是否已經獲勝
 function checkPlayerWin(): boolean {
-  const alive = gamePlayerList.filter(p => p.status !== 'eliminated');
-  return alive.length === 1 && alive[0].accountId === 'player0';
+    const alive = gamePlayerList.filter(p => p.status !== 'eliminated');
+    return alive.length === 1 && alive[0].accountId === 'player0';
 }
 
 // 處理誰是下一位玩家
@@ -111,13 +128,13 @@ function nextPlayer() {
         }
 
         // 判斷賽局是否結束
-        if(gameOver.value){
+        if (gameOver.value) {
             console.log('Game Over')
             return
         }
 
         // 判斷電腦玩家是否都出局，玩家獲得勝利
-        if(checkPlayerWin()){
+        if (checkPlayerWin()) {
             console.log('win')
             notifyPlayerWin()
         }
@@ -193,11 +210,11 @@ function handleCardScoring(card: Card) {
 
 // 將失敗的電腦玩家設定成eliminated
 function handleComputerPlayerEliminated(account: Account) {
-  const idx = gamePlayerList.findIndex(p => p.accountId === account.accountId);
-  if (idx !== -1) {
-    gamePlayerList[idx].status = 'eliminated';
-  }
-  nextPlayer();
+    const idx = gamePlayerList.findIndex(p => p.accountId === account.accountId);
+    if (idx !== -1) {
+        gamePlayerList[idx].status = 'eliminated';
+    }
+    nextPlayer();
 }
 
 // 將失敗的玩家設定成eliminated
@@ -234,21 +251,21 @@ function handleEffectCard(card: Card) {
 
 // 計算目前輪次最高手牌上限
 function calcMaxCurrentHandLimit(playCount: number, firstRound: number, nextRound: number): number {
-  const originHandCardsCount = 5
-  if (playCount <= firstRound) {
-    return originHandCardsCount;
-  }
-  const extra = Math.floor((playCount - firstRound) / nextRound) + 1 ;
-  const limit = originHandCardsCount - extra;
-  return Math.max(limit, 2);
+    const originHandCardsCount = 5
+    if (playCount <= firstRound) {
+        return originHandCardsCount;
+    }
+    const extra = Math.floor((playCount - firstRound) / nextRound) + 1;
+    const limit = originHandCardsCount - extra;
+    return Math.max(limit, 2);
 }
 
 // 發新一張牌到手牌
-async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => void; getHandCardsCount: () => number;}) {
+async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => void; getHandCardsCount: () => number; }) {
     const handCardsCount = targetInstance.getHandCardsCount();
     maxHandCardCount.value = calcMaxCurrentHandLimit(playCount.value, maxHandCardCountRoundSetting.firstRound, maxHandCardCountRoundSetting.nextRound)
     if (maxHandCardCount.value <= handCardsCount) {
-    return
+        return
     }
 
     async function tryDraw(count = 1) {
@@ -279,15 +296,7 @@ function setInitTurn() {
 
 // 設定最一開始的玩家
 async function resetGame() {
-    gameOver.value = false;
-    deckID.value = null;
-    latestPlayedCard.value = null;
-    latestPlayer.value = null;
-    gameScore.value = 0;
-    activeIndex.value = 0;
-    activeAccount.value = null;
-    isReversed.value = false;
-    maxHandCardCount.value = 5;
+    Object.assign(Object.assign(state, createGameState()))
     scorePanelRef.value?.resetScorePanel();
     for (const child of allPlayerRefs.value) {
         if (!child) continue
@@ -305,50 +314,51 @@ async function resetGame() {
 }
 
 const notifyPlayerWin = () => {
-  Swal.fire({
-    title: "Winner winner chicken dinner.",
-    width: 600,
-    padding: "3em",
-    color: "#716add",
-    showDenyButton: true,
-    confirmButtonText: 'Back to Home',
-    denyButtonText: `Play Again`,
-    backdrop: `
-      rgba(0,0,123,0.4)
-      url("${nyanCat}")
-      left top
-      no-repeat 
-    `
-  }).then((result) => {
-    if (result.isConfirmed) {
-        console.log('Confirmed')
-    } else if (result.isDenied) {
-        resetGame()
-        console.log('Denied')
-    }
-  });
+    Swal.fire({
+        title: "Winner winner chicken dinner.",
+        width: 600,
+        padding: "3em",
+        color: "#716add",
+        showDenyButton: true,
+        confirmButtonText: 'Back to Home',
+        denyButtonText: `Play Again`,
+        backdrop: `
+            rgba(0,0,123,0.4)
+            url("${nyanCat}")
+            left top
+            no-repeat 
+        `
+    })
+        .then((result) => {
+            if (result.isConfirmed) {
+                console.log('Confirmed')
+            } else if (result.isDenied) {
+                resetGame()
+                console.log('Denied')
+            }
+        });
 }
 
 const notifyPlayerLose = () => {
-  Swal.fire({
-    title: 'You Lose',
-    showDenyButton: true,
-    confirmButtonText: 'Back to Home',
-    denyButtonText: `Play Again`,
-    customClass: {
-      confirmButton: 'btn btn btn-primary me-2',
-      denyButton: 'btn btn btn-primary'
-    },
-    buttonsStyling: false
-  })
-  .then((result) => {
-    if (result.isConfirmed) {
-        console.log('Confirmed')
-    } else if (result.isDenied) {
-        resetGame()
-        console.log('Denied')
-    }
-  })
+    Swal.fire({
+        title: 'You Lose',
+        showDenyButton: true,
+        confirmButtonText: 'Back to Home',
+        denyButtonText: `Play Again`,
+        customClass: {
+            confirmButton: 'btn btn btn-primary me-2',
+            denyButton: 'btn btn btn-primary'
+        },
+        buttonsStyling: false
+    })
+        .then((result) => {
+            if (result.isConfirmed) {
+                console.log('Confirmed')
+            } else if (result.isDenied) {
+                resetGame()
+                console.log('Denied')
+            }
+        })
 }
 
 onMounted(async () => {

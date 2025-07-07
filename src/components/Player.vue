@@ -33,19 +33,31 @@
         @confirm="handleDesignateEffect" />
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch, computed } from 'vue'
+import { onMounted, toRefs, reactive, ref, watch, computed } from 'vue'
 import type { Card, Account } from '@/types/baseType'
 import { translateCardsValue, translateCardsSuit, analyszeBestPlay } from '@/utils/cardUtils'
 import AddOrSubEffectDialog from '@/components/AddOrSubEffectDialog.vue'
 import DesignateEffectDialog from '@/components/DesignateEffectDialog.vue'
-const cardList = ref<Card[]>([]);
-const selectedCardIndex = ref<number | null>(null)
-const latestPlayedCard = ref<Card | null>(null);
+function createPlayerState() {
+    return {
+        cardList: [] as Card[],
+        selectedCardIndex: null as number | null,
+        latestPlayedCard: null as Card | null,
+        showAddOrSubDialog: false,
+        categoryAddOrSubDialog: '',
+        showDesignateDialog: false,
+        otherPlayerList: [] as Account[],
+    }
+}
+const state = reactive(createPlayerState())
+const { cardList,
+    selectedCardIndex,
+    latestPlayedCard,
+    showAddOrSubDialog,
+    categoryAddOrSubDialog,
+    showDesignateDialog,
+    otherPlayerList } = toRefs(state)
 const sortOrder = ref<'asc' | 'desc'>('desc')
-const showAddOrSubDialog = ref(false)
-const categoryAddOrSubDialog = ref('')
-const showDesignateDialog = ref(false)
-const otherPlayerList = ref<Account[]>([])
 
 const props = defineProps<{
     playerList: Account[]
@@ -92,13 +104,13 @@ async function AnalysisPlayCard() {
 
 // 告知賽局這個玩家沒牌可出所以出局
 function reportPlayerEliminated(player: Account) {
-  props.playerInfo.status = 'eliminated'
-  emit('report-player-eliminated', player)
+    props.playerInfo.status = 'eliminated'
+    emit('report-player-eliminated', player)
 }
 
 // 判斷可出的手牌
 function isCardDisabled(card: Card): boolean {
-  return card.score > remainingToMaxScore.value && card.level == 1;
+    return card.score > remainingToMaxScore.value && card.level == 1;
 }
 
 // 出牌
@@ -171,7 +183,7 @@ function receiveCards(cards: Card[]) {
 
 // 告知賽局目前手牌數量
 function getHandCardsCount(): number {
-  return cardList.value.length
+    return cardList.value.length
 }
 
 // 排序CardList
@@ -203,15 +215,9 @@ function toggleCardSelection(index: number) {
     selectedCardIndex.value = selectedCardIndex.value === index ? null : index;
 }
 
-// 重置Plaer
+// 重置Player
 function resetPlayer() {
-    cardList.value = [];
-    selectedCardIndex.value = null;
-    latestPlayedCard.value = null;
-    showAddOrSubDialog.value = false;
-    categoryAddOrSubDialog.value = '';
-    showDesignateDialog.value = false;
-    otherPlayerList.value = [];
+    Object.assign(state, createPlayerState())
 }
 
 onMounted(() => {
@@ -230,7 +236,7 @@ onMounted(() => {
 }
 
 .card-disabled {
-  opacity: 0.5;
-  pointer-events: none;
+    opacity: 0.5;
+    pointer-events: none;
 }
 </style>

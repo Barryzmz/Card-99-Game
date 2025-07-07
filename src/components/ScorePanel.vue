@@ -35,9 +35,23 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
+import { reactive, toRefs } from 'vue'
 import type { Card } from '@/types/baseType'
 import { translateCardsValue } from '@/utils/cardUtils'
+function createScorePanelState() {
+  return {
+    gameScore: 0 as number,
+    playCount: 0 as number,
+    latestEffect: '' as string,
+    latestPlayer: '' as string,
+  }
+}
+const state = reactive(createScorePanelState())
+const { gameScore,
+    playCount,
+    latestEffect,
+    latestPlayer } = toRefs(state)
+
 const props = defineProps<{
     latestPlayedCard: Card | null
     latestPlayer: string | null
@@ -49,11 +63,6 @@ const emit = defineEmits<{
     (e: 'score-updated', newScore: number): void
     (e: 'playCount-updated', playCount: number): void
 }>()
-
-let gameScore = ref(0);
-let latestEffect = ref('')
-let latestPlayer = ref('')
-let playCount = ref(0)
 
 // 處理分數功能
 function handleScore(card: Card, player: string) {
@@ -123,10 +132,7 @@ function handleCardEffectDiscription(card: Card) {
 
 // 重置計分區塊
 function resetScorePanel() {
-    gameScore.value = 0;
-    latestEffect.value = '';
-    latestPlayer.value = '';
-    playCount.value = 0;
+    Object.assign(state, createScorePanelState())
 }
 
 defineExpose({

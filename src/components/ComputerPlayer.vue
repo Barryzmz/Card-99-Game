@@ -20,16 +20,26 @@
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch, computed } from 'vue'
+import {onMounted, toRefs, reactive, watch, computed } from 'vue'
 import { analyszeBestPlay, getRandomAccount } from '@/utils/cardUtils'
 import type { Card, Account } from '@/types/baseType'
 import avatar from '@/assets/avator.svg'
 import pointer from '@/assets/left-arrow.svg'
 import { toast } from 'vue3-toastify';
-const cardList = ref<Card[]>([]);
-const selectedCardIndex = ref<number | null>(null)
-const latestPlayedCard = ref<Card | null>(null);
-const otherPlayerList = ref<Account[]>([])
+function createPlayerState() {
+  return {
+    cardList: [] as Card[],
+    selectedCardIndex: null as number | null,
+    latestPlayedCard: null as Card | null,
+    otherPlayerList: [] as Account[],
+  }
+}
+const state = reactive(createPlayerState())
+const { cardList, 
+        selectedCardIndex, 
+        latestPlayedCard,
+        otherPlayerList } = toRefs(state)
+
 const props = defineProps<{
     playerList: Account[]
     playerInfo: Account
@@ -162,12 +172,9 @@ function getHandCardsCount(): number {
     return cardList.value.length
 }
 
-// 重置Plaer
+// 重置Player
 function resetPlayer() {
-    cardList.value = [];
-    selectedCardIndex.value = null;
-    latestPlayedCard.value = null;
-    otherPlayerList.value = [];
+    Object.assign(state, createPlayerState())
 }
 
 onMounted(() => {
