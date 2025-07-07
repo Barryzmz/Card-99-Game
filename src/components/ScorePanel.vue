@@ -4,29 +4,27 @@
             <div class="flex-grow-1 bg-white text-dark p-3 rounded">
                 <h1 class="m-0">Score: {{ gameScore }}</h1>
             </div>
-            <div class="bg-white text-dark p-3 rounded d-flex align-items-center justify-content-center"
-                style="min-width: 50px;">
-                <h2 class="fw-bold m-0">Play Count: {{ playCount }}</h2>
+            <div class="flex-grow-1 bg-white text-dark p-3 rounded">
+                <h3 class="m-0">Now Playing:</h3>
+                <h4 class="fw-bold m-0">{{ currentPlayer }}</h4>
             </div>
         </div>
         <div class="d-flex gap-2 align-items-stretch">
-            <div class="bg-white p-3 rounded d-flex flex-column justify-content-center align-items-center"
-                style="height: 250px;">
+            <div class="bg-white p-3 rounded d-flex flex-column justify-content-center align-items-center mb-0">
                 <template v-if="latestPlayedCard !== null">
                     <h3 class="text-dark mb-2">Latest Card:</h3>
-                    <img :src="latestPlayedCard.cardValue?.images?.png" style="height: 200px;" />
+                    <img :src="latestPlayedCard.cardValue?.images?.png" style="height: 150px;" />
                 </template>
                 <template v-else>
                     <h4 class="text-muted fst-italic">Start Game</h4>
                 </template>
             </div>
-            <div class="d-flex flex-column justify-content-between flex-grow-1" style="height: 250px;">
-                <div class="bg-white text-dark p-3 rounded">
-                    <h3 class="m-0">Now Playing:</h3>
-                    <h4 class="m-0">{{ currentPlayer }}</h4>
+            <div class="d-flex flex-column justify-content-start flex-grow-1">
+                <div class="bg-white text-dark p-3 rounded d-flex flex-column align-items-start mt-0">
+                    <h4 class="m-0">Play Count: {{ playCount }}</h4>
+                    <h4 class="m-0">Max hand card: {{ maxHandCardCount }}</h4>
                 </div>
-                <div class="bg-white text-dark p-3 rounded mt-auto d-flex flex-column align-items-start mt-1"
-                    style="min-height: 3rem;">
+                <div class="bg-white text-dark p-3 rounded d-flex flex-column align-items-start mt-2">
                     <h3 class="m-0">Latest state:</h3>
                     <h4 class="m-0">player: {{ latestPlayer }}</h4>
                     <h4 class="m-0">play: {{ latestPlayedCard?.cardValue.code }}</h4>
@@ -44,6 +42,7 @@ const props = defineProps<{
     latestPlayedCard: Card | null
     latestPlayer: string | null
     currentPlayer: string | null
+    maxHandCardCount: number | null
 }>()
 
 const emit = defineEmits<{
@@ -58,7 +57,7 @@ let playCount = ref(0)
 
 // 處理分數功能
 function handleScore(card: Card, player: string) {
-    latestPlayer.value =  player
+    latestPlayer.value = player
     handleEffectCard(card)
     handleCardEffectDiscription(card)
     emit('score-updated', gameScore.value)
@@ -95,18 +94,18 @@ function handleCardEffectDiscription(card: Card) {
             latestEffect.value = `Designate to ${card.designate.name}`;
             break;
         case "add_or_sub_ten":
-            if (card.score > 0) 
+            if (card.score > 0)
                 latestEffect.value = `Add 10`
-            else 
+            else
                 latestEffect.value = `subtract 10`
             break;
         case "skip_turn":
             latestEffect.value = `Skip turn`
             break;
         case "add_or_sub_twenty":
-            if (card.score > 0) 
+            if (card.score > 0)
                 latestEffect.value = `Add 20`
-            else 
+            else
                 latestEffect.value = `subtract 20`
             break;
         case "set_score_to_ninetyNine":

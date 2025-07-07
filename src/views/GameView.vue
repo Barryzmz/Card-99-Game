@@ -30,6 +30,7 @@
                             :latestPlayer="latestPlayer?.name ?? null"
                             :currentPlayer="activeAccount?.name ?? null" 
                             :latestPlayedCard="latestPlayedCard"
+                            :maxHandCardCount="maxHandCardCount"
                             @score-updated="gameScore = $event"
                             @playCount-updated="playCount = $event"
                         />
@@ -86,6 +87,7 @@ const allPlayerRefs = computed(() => [
     playerRef.value,
     computerPlayerRef.value,
 ])
+const maxHandCardCount = ref(5)
 const maxHandCardCountRoundSetting = {
   firstRound: 10,
   nextRound: 5
@@ -244,8 +246,8 @@ function calcMaxCurrentHandLimit(playCount: number, firstRound: number, nextRoun
 // 發新一張牌到手牌
 async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => void; getHandCardsCount: () => number;}) {
     const handCardsCount = targetInstance.getHandCardsCount();
-    const MaxHandCardCount = calcMaxCurrentHandLimit(playCount.value, maxHandCardCountRoundSetting.firstRound, maxHandCardCountRoundSetting.nextRound)
-    if (MaxHandCardCount <= handCardsCount) {
+    maxHandCardCount.value = calcMaxCurrentHandLimit(playCount.value, maxHandCardCountRoundSetting.firstRound, maxHandCardCountRoundSetting.nextRound)
+    if (maxHandCardCount.value <= handCardsCount) {
     return
     }
 
