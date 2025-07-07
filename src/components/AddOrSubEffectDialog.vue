@@ -4,8 +4,11 @@
         <div class="position-absolute start-50 top-25 translate-middle-x bg-white p-4 rounded shadow"
             style="width: 450px; z-index: 1051;">
             <h5 class="mb-3">{{ cardName }} Effect</h5>
-            <p class="mb-1">Current Score: {{ props.gameScore }}</p>
-            <p class="mb-1">Do you want to add {{ cardValue }} or subtract {{ cardValue }} score?</p>
+            <div class="d-flex align-items-center mb-2">
+                <p class="mb-0 me-2">Current Score:</p>
+                <p class="mb-0 fw-bold">{{ props.gameScore }}</p>
+            </div>
+            <p class="mb-3">Do you want to add {{ cardValue }} or subtract {{ cardValue }} score?</p>
             <div class="d-flex justify-content-end gap-2">
                 <button class="btn btn-danger flex-fill" style="min-width: 120px;" @click="emitEffect(1)" :disabled="isAddScoreAllowed">
                     Add {{ cardValue }}
