@@ -7,7 +7,7 @@
             <p class="mb-1">Current Score: {{ props.gameScore }}</p>
             <p class="mb-1">Do you want to add {{ cardValue }} or subtract {{ cardValue }} score?</p>
             <div class="d-flex justify-content-end gap-2">
-                <button class="btn btn-danger flex-fill" style="min-width: 120px;" @click="emitEffect(1)">
+                <button class="btn btn-danger flex-fill" style="min-width: 120px;" @click="emitEffect(1)" :disabled="isAddScoreAllowed">
                     Add {{ cardValue }}
                 </button>
                 <button class="btn btn-success flex-fill" style="min-width: 120px;" @click="emitEffect(-1)">
