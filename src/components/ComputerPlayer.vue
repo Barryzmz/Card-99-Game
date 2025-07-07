@@ -81,7 +81,7 @@ async function AnalysisPlayCard() {
     const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value)
     if (bestCard == null) {
         console.log(props.playerInfo.name, '<<<<<lose>>>>>')
-        console.log(props.playerInfo.name, "'s cardList", cardList.value)
+        console.log(props.playerInfo.name, 'gameScore', props.gameScore, "'s cardList", cardList.value)
         reportPlayerEliminated(props.playerInfo)
     }
     selectedCardIndex.value = cardList.value.findIndex(card => card === bestCard)
@@ -107,7 +107,7 @@ function playCard() {
         latestPlayedCard.value = cardList.value[selectedCardIndex.value]
         handleCardEffect(latestPlayedCard.value)
     } catch (error) {
-        console.error('draw new card failed:', error)
+        console.error('computer playCard failed:', error)
     }
 }
 
