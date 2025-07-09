@@ -89,7 +89,15 @@ const {
     isReversed,
     maxHandCardCount
 } = toRefs(state)
-let player: Account = { idx: 0, avatar: '', accountId: 'player0', name: 'BarryZhuang', status: 'playing' }
+const props = defineProps<{
+    playerName: string
+    opponentCount: number
+    firstRound: number
+    nextRound: number
+}>()
+const { playerName, opponentCount, firstRound, nextRound } = props
+let player: Account = { idx: 0, avatar: '', accountId: 'player0', name: playerName, status: 'playing' }
+
 const computerList : Account[] = [
     { idx: 1, avatar: '', accountId: 'player1', name: 'Bot A', status: 'playing' },
     { idx: 2, avatar: '', accountId: 'player2', name: 'Bot B', status: 'playing' },
@@ -107,8 +115,8 @@ const allPlayerRefs = computed(() => [
     ...computerPlayersRef.value,
 ])
 const maxHandCardCountRoundSetting = {
-    firstRound: 10,
-    nextRound: 5
+    firstRound: firstRound,
+    nextRound: nextRound
 }
 
 // 檢查是否已經獲勝
@@ -287,7 +295,7 @@ async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => voi
 
 // 把使用者加入遊戲順序清單
 function getPlayerNames() {
-    selectComputerList.value = computerList.slice(0, 3)
+    selectComputerList.value = computerList.slice(0, opponentCount)
     gamePlayerList = [ player, ...selectComputerList.value ]
 }
 

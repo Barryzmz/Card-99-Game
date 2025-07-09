@@ -12,8 +12,14 @@ const router = createRouter({
     },
     {
       path: '/game',
-      name: 'GameView ',
+      name: 'GameView',
       component: GameView ,
+      props: route => ({
+        playerName: route.query.playerName,
+        opponentCount: Number(route.query.opponentCount),
+        firstRound: Number(route.query.firstRound),
+        nextRound: Number(route.query.nextRound)
+      })
     },
     {
       path: '/about',

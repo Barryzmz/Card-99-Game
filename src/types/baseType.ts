@@ -33,3 +33,7 @@ export interface Card {
   designate: {accountId: string, name: string}
 }
 
+export interface RoundSetting {
+  firstRound: number,
+  nextRound: number,
+}
