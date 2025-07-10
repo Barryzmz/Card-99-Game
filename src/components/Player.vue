@@ -9,7 +9,7 @@
         </div>
         <div class="row">
             <div class="col-10 text-white">
-                <div class="d-flex flex-row gap-2 p-5">
+                <div class="d-flex flex-row gap-2 py-4">
                     <div v-for="(card, index) in cardList" :key="card.cardValue.code"
                         @click="toggleCardSelection(index)" :class="{
                             'card-raised': selectedCardIndex === index,
