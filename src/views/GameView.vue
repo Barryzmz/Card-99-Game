@@ -1,7 +1,7 @@
 <template>
-    <div class="container-fluid min-vh-100 p-0 bg-success">
+    <div class="container-fluid  p-0 bg-success">
         <div class="row d-flex justify-content-center mx-0 ">
-            <div class="col-3 pt-2 bg-secondary">
+            <div class="col-3 pt-2 min-vh-100 bg-secondary ">
                 <div class="d-flex justify-content-center align-items-center bg-light p-2 mb-2 rounded">
                     <div class="col-auto">
                         <h3 class="text-dark mb-0">Turn Order:</h3>
@@ -22,9 +22,23 @@
                     @report-computerPlayer-eliminated="handleComputerPlayerEliminated"
                 />
             </div>
-            <div class="col-9 p-0">
-                <div class="d-flex justify-content-center align-items-start pt-2">
-                    <h3 class="text-white">Card 99 Game</h3>
+            <div class="col-9 p-0 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-center align-items-start pt-2 my-2">
+                    <div class="col-4 p-0">
+                        <h3 class="text-white"> </h3>
+                    </div>
+                    <div class="col-4 d-flex justify-content-center align-items-center">
+                        <h3 class="text-white">Card 99 Game</h3>
+                    </div>
+                    <div class="col-4 p-0">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <RouterLink to="/" class="btn btn-primary mx-1">
+                                Back to Home
+                            </RouterLink>
+                            <button type="button" class="btn btn-primary mx-1" @click="resetGame">Reset Game</button>
+                        </div>
+                        
+                    </div>
                 </div>
                 <div class="row d-flex justify-content-center mx-0 overflow-hidden">
                     <div class="col-8 p-0">
@@ -52,6 +66,7 @@
 </template>
 <script setup lang="ts">
 import { reactive, toRefs, onMounted, ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import type { CardValue, Card, Account } from '@/types/baseType'
@@ -62,6 +77,9 @@ import ComputerPlayer from '@/components/ComputerPlayer.vue'
 import upArrow from '@/assets/up-arrow.svg'
 import downArrow from '@/assets/down-arrow.svg'
 import nyanCat from '@/assets/nyan-cat.gif'
+
+const router = useRouter()
+
 function createGameState() {
     return {
         gameOver: false as boolean,
@@ -339,10 +357,10 @@ const notifyPlayerWin = () => {
     })
         .then((result) => {
             if (result.isConfirmed) {
-                console.log('Confirmed')
+                console.log('notifyPlayerWin-home')
+                router.push({ name: 'home' })
             } else if (result.isDenied) {
                 resetGame()
-                console.log('Denied')
             }
         });
 }
@@ -361,10 +379,10 @@ const notifyPlayerLose = () => {
     })
         .then((result) => {
             if (result.isConfirmed) {
-                console.log('Confirmed')
+                console.log('notifyPlayerLose-home')
+                router.push({ name: 'home' })
             } else if (result.isDenied) {
                 resetGame()
-                console.log('Denied')
             }
         })
 }
