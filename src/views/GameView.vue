@@ -70,7 +70,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import type { CardValue, Card, Account } from '@/types/baseType'
-import { convertToCard } from '@/utils/cardUtils'
+import { convertToCard, getRandomAccount } from '@/utils/cardUtils'
 import ScorePanel from '@/components/ScorePanel.vue'
 import PlayerArea from '@/components/Player.vue'
 import ComputerPlayer from '@/components/ComputerPlayer.vue'
@@ -317,12 +317,20 @@ function getPlayerNames() {
     gamePlayerList = [ player, ...selectComputerList.value ]
 }
 
-// 設定最一開始的玩家
+// 設定第一位出牌的玩家
 function setInitTurn() {
-    activeAccount.value = gamePlayerList[activeIndex.value];
+    const firstPlayer = getRandomAccount(gamePlayerList)
+    if (!firstPlayer || typeof firstPlayer.accountId !== 'string') {
+        activeAccount.value = gamePlayerList[activeIndex.value];
+        console.warn('The first player accountId is empty');
+        return;
+    }
+    else {
+        setActiveByAccountId(firstPlayer?.accountId);
+    }
 }
 
-// 設定最一開始的玩家
+// 重置遊戲
 async function resetGame() {
     Object.assign(Object.assign(state, createGameState()))
     scorePanelRef.value?.resetScorePanel();
