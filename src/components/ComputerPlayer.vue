@@ -122,11 +122,11 @@ function handleCardEffect(card: Card) {
 
     switch (card.effect) {
         case 'add_or_sub_twenty':
-            handleAddOrSubEffect(-1);
+            handleAddOrSubEffect();
             break;
 
         case 'add_or_sub_ten':
-            handleAddOrSubEffect(-1);
+            handleAddOrSubEffect();
             break;
 
         case 'designate_next_player':
@@ -143,12 +143,25 @@ function handleCardEffect(card: Card) {
 }
 
 // 預處理可加減功能(Q、10)
-function handleAddOrSubEffect(parameter: number) {
-    if (latestPlayedCard.value !== null) {
-        const originScore = latestPlayedCard.value.score;
-        latestPlayedCard.value.score = originScore * parameter;
-        handleCardScoring(latestPlayedCard.value);
-    }
+function handleAddOrSubEffect() {
+    const card = latestPlayedCard.value;
+    if (!card) return;
+
+    const ADD_THRESHOLD = 49;
+    const functionCardCount = cardList.value.filter(c => c.level > 1).length;
+
+    // 1. 分數在50分(包含)以下就選擇加分數
+    // 2. 如果分數允許且手上功能牌大於1張就選擇加分數
+    const shouldAdd =remainingToMaxScore.value >= ADD_THRESHOLD ||
+        (
+            remainingToMaxScore.value >= card.score &&
+            functionCardCount > 1
+        );
+
+    const parameter = shouldAdd ? 1 : -1;
+    card.score *= parameter;
+
+    handleCardScoring(card);
 }
 
 // 預處理指定玩家功能
