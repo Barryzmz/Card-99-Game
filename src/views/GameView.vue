@@ -198,29 +198,19 @@ async function handleCardScoring(card: Card) {
     const dealer = gameController.state.activeAccount?.name || ''
     gameController.state.latestPlayedCard = card
     gameController.state.latestPlayer = gameController.state.activeAccount
-    switch (card.effect) {
-        case 'set_score_to_ninetyNine':
-            gameController.state.gameScore = 99
-            break;
-
-        case 'reset_score':
-            gameController.state.gameScore = 0
-            break;
-
-        default:
-            const result = gameController.state.gameScore + card.score
-            gameController.state.gameScore = Math.max(result, 0)
-            break;
-    }
-    gameController.state.playCount ++
+    const currentInst = allPlayerRefs.value[gameController.state.activeIndex] // 得到目前玩家的ref
+    card.effectStrategy.execute(gameController, gamePlayerList, card); // 處理牌的功能
+    gameController.state.playCount ++ // 輪次加1
     await nextTick()
     scorePanelRef.value?.handleCardEffectDiscription(card, dealer)
-    //抓下一個玩家的組件ref
-    const nextInst = allPlayerRefs.value[gameController.state.activeIndex]
-    if (nextInst) {
-        getNewCard(nextInst)
+    //用currentInst發牌給目前玩家
+    if (currentInst) {
+        getNewCard(currentInst)
     }
-    handleEffectCard(card);
+    //非指定牌就輪下一位玩家
+    if (card.effectStrategy.nextPlayer) {
+        nextPlayer()
+    }
 }
 
 // 將失敗的電腦玩家設定成eliminated
@@ -240,28 +230,6 @@ function handlePlayerEliminated(account: Account) {
     }
     gameController.state.gameOver = true
     notifyPlayerLose()
-}
-
-// 處理牌對回合效果
-function handleEffectCard(card: Card) {
-    switch (card.effect) {
-        case 'reverse_turn_order':
-            gameController.state.isReversed = !gameController.state.isReversed
-            nextPlayer()
-            break;
-
-        case 'designate_next_player':
-            setActiveByAccountId(card.designate.accountId)
-            break;
-
-        case 'skip_turn':
-            nextPlayer();
-            break;
-
-        default:
-            nextPlayer();
-            break;
-    }
 }
 
 // 計算目前輪次最高手牌上限
