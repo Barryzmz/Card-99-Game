@@ -37,63 +37,35 @@
 <script setup lang="ts">
 import { reactive, toRefs } from 'vue'
 import type { Card } from '@/types/baseType'
-import { translateCardsValue } from '@/utils/cardUtils'
 function createScorePanelState() {
-  return {
-    gameScore: 0 as number,
-    playCount: 0 as number,
-    latestEffect: '' as string,
-    latestPlayer: '' as string,
-  }
-}
-const state = reactive(createScorePanelState())
-const { gameScore,
-    playCount,
-    latestEffect,
-    latestPlayer } = toRefs(state)
-
-const props = defineProps<{
-    latestPlayedCard: Card | null
-    latestPlayer: string | null
-    currentPlayer: string | null
-    maxHandCardCount: number | null
-}>()
-
-const emit = defineEmits<{
-    (e: 'score-updated', newScore: number): void
-    (e: 'playCount-updated', playCount: number): void
-}>()
-
-// 處理分數功能
-function handleScore(card: Card, player: string) {
-    latestPlayer.value = player
-    handleEffectCard(card)
-    handleCardEffectDiscription(card)
-    emit('score-updated', gameScore.value)
-    playCount.value++
-    emit('playCount-updated', playCount.value)
-}
-
-// 處理功能牌
-function handleEffectCard(card: Card) {
-    switch (card.effect) {
-        case 'set_score_to_ninetyNine':
-            gameScore.value = 99
-            break;
-
-        case 'reset_score':
-            gameScore.value = 0
-            break;
-
-        default:
-            const result = gameScore.value + parseInt(translateCardsValue(card.score))
-            gameScore.value = Math.max(result, 0)
-            break;
+    return {
+        latestEffect: '' as string,
+        latestPlayer: '' as string,
+        latestPlayedCard: null as Card | null,
     }
 }
+const state = reactive(createScorePanelState())
+const { latestEffect, latestPlayer, latestPlayedCard } = toRefs(state)
+
+const props = defineProps<{
+    currentPlayer: string | null
+    maxHandCardCount: number | null
+    gameScore: number | null
+    playCount: number | null
+}>()
+
+const {
+    gameScore,
+    playCount,
+    currentPlayer,
+    maxHandCardCount,
+} = toRefs(props)
 
 // 處理Effect 描述
-function handleCardEffectDiscription(card: Card) {
+function handleCardEffectDiscription(card: Card, dealer: string) {
+    latestPlayer.value = dealer
+    latestPlayedCard.value = card
+
     switch (card.effect) {
         case "reverse_turn_order":
             latestEffect.value = "Reverse turn order";
@@ -126,7 +98,7 @@ function handleCardEffectDiscription(card: Card) {
             latestEffect.value = `Add ${card.score}`
             break;
     }
-    console.log('effect:', latestPlayer.value, latestEffect.value, 'SCORE', gameScore.value)
+    console.log('PlayCount:', playCount.value, latestPlayer.value, latestEffect.value, 'SCORE:', gameScore.value)
 }
 
 // 重置計分區塊
@@ -135,7 +107,7 @@ function resetScorePanel() {
 }
 
 defineExpose({
-    handleScore,
+    handleCardEffectDiscription,
     resetScorePanel
 })
 </script>

@@ -43,10 +43,10 @@
                 <div class="row d-flex justify-content-center mx-0 overflow-hidden">
                     <div class="col-8 p-0">
                         <ScorePanel ref="scorePanelRef" 
-                            :latestPlayer="latestPlayer?.name ?? null"
                             :currentPlayer="activeAccount?.name ?? null" 
-                            :latestPlayedCard="latestPlayedCard"
                             :maxHandCardCount="maxHandCardCount"
+                            :gameScore="gameScore"
+                            :playCount="playCount"
                             @score-updated="gameScore = $event"
                             @playCount-updated="playCount = $event"
                         />
@@ -65,7 +65,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { reactive, toRefs, onMounted, ref, computed } from 'vue'
+import { reactive, toRefs, onMounted, ref, computed, nextTick  } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Swal from 'sweetalert2'
@@ -221,12 +221,28 @@ function setActiveByAccountId(accountId: string) {
     }
 }
 
-// 將卡牌傳入ScorePanel 計分
-function handleCardScoring(card: Card) {
-    const playerName = activeAccount.value?.name || ''
+// 計分並將卡牌傳入ScorePanel 顯示
+async function handleCardScoring(card: Card) {
+    const dealer = activeAccount.value?.name || ''
     latestPlayedCard.value = card
     latestPlayer.value = activeAccount.value
-    scorePanelRef.value?.handleScore(card, playerName)
+    switch (card.effect) {
+        case 'set_score_to_ninetyNine':
+            gameScore.value = 99
+            break;
+
+        case 'reset_score':
+            gameScore.value = 0
+            break;
+
+        default:
+            const result = gameScore.value + card.score
+            gameScore.value = Math.max(result, 0)
+            break;
+    }
+    playCount.value++
+    await nextTick()
+    scorePanelRef.value?.handleCardEffectDiscription(card, dealer)
     //抓下一個玩家的組件ref
     const nextInst = allPlayerRefs.value[activeIndex.value]
     if (nextInst) {
