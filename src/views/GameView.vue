@@ -7,17 +7,17 @@
                         <h3 class="text-dark mb-0">Turn Order:</h3>
                     </div>
                     <div class="col-auto mx-3">
-                        <img :src="isReversed ? upArrow : downArrow" style="height: 40px;" alt="turn order arrow" />
+                        <img :src="gameController.state.isReversed ? upArrow : downArrow" style="height: 40px;" alt="turn order arrow" />
                     </div>
                 </div>
                 <ComputerPlayer
                     v-for="(bot, idx) in selectComputerList"
                     :key="bot.accountId"
                     ref="computerPlayersRef"
-                    :isActive="activeAccount?.accountId === bot.accountId"
+                    :isActive="gameController.state.activeAccount?.accountId === bot.accountId"
                     :playerInfo="bot"
                     :playerList="gamePlayerList"
-                    :gameScore="gameScore"
+                    :gameScore="gameController.state.gameScore"
                     @playCard="handleCardScoring"
                     @report-computerPlayer-eliminated="handleComputerPlayerEliminated"
                 />
@@ -43,20 +43,20 @@
                 <div class="row d-flex justify-content-center mx-0 overflow-hidden">
                     <div class="col-8 p-0">
                         <ScorePanel ref="scorePanelRef" 
-                            :currentPlayer="activeAccount?.name ?? null" 
-                            :maxHandCardCount="maxHandCardCount"
-                            :gameScore="gameScore"
-                            :playCount="playCount"
-                            @score-updated="gameScore = $event"
-                            @playCount-updated="playCount = $event"
+                            :currentPlayer="gameController.state.activeAccount?.name ?? null" 
+                            :maxHandCardCount="gameController.state.maxHandCardCount"
+                            :gameScore="gameController.state.gameScore"
+                            :playCount="gameController.state.playCount"
+                            @score-updated="gameController.state.gameScore = $event"
+                            @playCount-updated="gameController.state.playCount = $event"
                         />
                     </div>
                 </div>
                 <PlayerArea ref="playerRef"
-                    :isActive="activeAccount?.accountId === player.accountId"
+                    :isActive="gameController.state.activeAccount?.accountId === player.accountId"
                     :playerInfo="player"
                     :playerList="gamePlayerList"
-                    :gameScore="gameScore"
+                    :gameScore="gameController.state.gameScore"
                     @playCard="handleCardScoring"
                     @report-Player-eliminated="handlePlayerEliminated"
                 />
@@ -81,19 +81,6 @@ import nyanCat from '@/assets/nyan-cat.gif'
 
 const router = useRouter()
 const gameController = useGameController()
-const {
-    gameOver,
-    deckID,
-    playCount,
-    latestPlayedCard,
-    latestPlayer,
-    gameScore,
-    activeIndex,
-    activeAccount,
-    isReversed,
-    maxHandCardCount
-} = toRefs(gameController.state)
-
 const props = defineProps<{
     playerName: string
     opponentCount: number
@@ -102,7 +89,6 @@ const props = defineProps<{
 }>()
 const { playerName, opponentCount, firstRound, nextRound } = props
 let player: Account = { idx: 0, avatar: '', accountId: 'player0', name: playerName, status: 'playing' }
-
 const computerList : Account[] = [
     { idx: 1, avatar: '', accountId: 'player1', name: 'Bot A', status: 'playing' },
     { idx: 2, avatar: '', accountId: 'player2', name: 'Bot B', status: 'playing' },
@@ -133,7 +119,7 @@ function checkPlayerWin(): boolean {
 // 處理誰是下一位玩家
 function nextPlayer() {
     const len = allPlayerRefs.value.length
-    let newIndex = activeIndex.value
+    let newIndex = gameController.state.activeIndex
     let attempts = 0
     do {
         if (++attempts > len) {
@@ -142,7 +128,7 @@ function nextPlayer() {
         }
 
         // 判斷賽局是否結束
-        if (gameOver.value) {
+        if (gameController.state.gameOver) {
             console.log('Game Over')
             return
         }
@@ -153,25 +139,25 @@ function nextPlayer() {
             notifyPlayerWin()
         }
 
-        newIndex = isReversed.value
+        newIndex = gameController.state.isReversed
             ? (newIndex - 1 + len) % len
             : (newIndex + 1) % len
         const candidate = gamePlayerList[newIndex]
         if (candidate.status !== 'eliminated') {
             break
         }
-    } while (newIndex !== activeIndex.value)
-    activeIndex.value = newIndex
-    activeAccount.value = gamePlayerList[newIndex]
+    } while (newIndex !== gameController.state.activeIndex)
+    gameController.state.activeIndex = newIndex
+    gameController.state.activeAccount = gamePlayerList[newIndex]
 }
 
 // 洗牌
 async function getDeck() {
     try {
-        gameOver.value = false;
-        if (deckID.value == null) {
+        gameController.state.gameOver = false;
+        if (gameController.state.deckID == null) {
             const result = await axios.get("https://www.deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1");
-            deckID.value = result.data.deck_id;
+            gameController.state.deckID = result.data.deck_id;
         }
     } catch (error) {
         console.error('getDeck error:', error);
@@ -185,7 +171,7 @@ async function getInitCards() {
             if (!child) continue
 
             const result = await axios.get(
-                `https://www.deckofcardsapi.com/api/deck/${deckID.value}/draw/?count=5`
+                `https://www.deckofcardsapi.com/api/deck/${gameController.state.deckID}/draw/?count=5`
             )
             const initCardList: Card[] = (result.data.cards as CardValue[])
                 .map(cv => convertToCard(cv))
@@ -201,8 +187,8 @@ async function getInitCards() {
 function setActiveByAccountId(accountId: string) {
     const idx = gamePlayerList.findIndex(p => p.accountId === accountId)
     if (idx !== -1) {
-        activeIndex.value = idx
-        activeAccount.value = gamePlayerList[idx]
+        gameController.state.activeIndex = idx
+        gameController.state.activeAccount = gamePlayerList[idx]
     } else {
         console.warn(`Can't find player with accountId=${accountId}`)
     }
@@ -210,28 +196,28 @@ function setActiveByAccountId(accountId: string) {
 
 // 計分並將卡牌傳入ScorePanel 顯示
 async function handleCardScoring(card: Card) {
-    const dealer = activeAccount.value?.name || ''
-    latestPlayedCard.value = card
-    latestPlayer.value = activeAccount.value
+    const dealer = gameController.state.activeAccount?.name || ''
+    gameController.state.latestPlayedCard = card
+    gameController.state.latestPlayer = gameController.state.activeAccount
     switch (card.effect) {
         case 'set_score_to_ninetyNine':
-            gameScore.value = 99
+            gameController.state.gameScore = 99
             break;
 
         case 'reset_score':
-            gameScore.value = 0
+            gameController.state.gameScore = 0
             break;
 
         default:
-            const result = gameScore.value + card.score
-            gameScore.value = Math.max(result, 0)
+            const result = gameController.state.gameScore + card.score
+            gameController.state.gameScore = Math.max(result, 0)
             break;
     }
-    playCount.value++
+    gameController.state.playCount ++
     await nextTick()
     scorePanelRef.value?.handleCardEffectDiscription(card, dealer)
     //抓下一個玩家的組件ref
-    const nextInst = allPlayerRefs.value[activeIndex.value]
+    const nextInst = allPlayerRefs.value[gameController.state.activeIndex]
     if (nextInst) {
         getNewCard(nextInst)
     }
@@ -253,7 +239,7 @@ function handlePlayerEliminated(account: Account) {
     if (idx !== -1) {
         gamePlayerList[idx].status = 'eliminated';
     }
-    gameOver.value = true
+    gameController.state.gameOver = true
     notifyPlayerLose()
 }
 
@@ -261,7 +247,7 @@ function handlePlayerEliminated(account: Account) {
 function handleEffectCard(card: Card) {
     switch (card.effect) {
         case 'reverse_turn_order':
-            isReversed.value = !isReversed.value
+            gameController.state.isReversed = !gameController.state.isReversed
             nextPlayer()
             break;
 
@@ -293,20 +279,20 @@ function calcMaxCurrentHandLimit(playCount: number, firstRound: number, nextRoun
 // 發新一張牌到手牌
 async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => void; getHandCardsCount: () => number; }) {
     const handCardsCount = targetInstance.getHandCardsCount();
-    maxHandCardCount.value = calcMaxCurrentHandLimit(playCount.value, maxHandCardCountRoundSetting.firstRound, maxHandCardCountRoundSetting.nextRound)
-    if (maxHandCardCount.value <= handCardsCount) {
+    gameController.state.maxHandCardCount = calcMaxCurrentHandLimit(gameController.state.playCount, maxHandCardCountRoundSetting.firstRound, maxHandCardCountRoundSetting.nextRound)
+    if (gameController.state.maxHandCardCount <= handCardsCount) {
         return
     }
 
     async function tryDraw(count = 1) {
         const res = await axios.get(
-            `https://www.deckofcardsapi.com/api/deck/${deckID.value}/draw/?count=${count}`
+            `https://www.deckofcardsapi.com/api/deck/${gameController.state.deckID}/draw/?count=${count}`
         );
         return res.data;
     }
     let data = await tryDraw(1);
     if (!data.cards.length) {
-        deckID.value = null
+        gameController.state.deckID = null
         await getDeck();
         data = await tryDraw(1);
     }
@@ -324,7 +310,7 @@ function getPlayerNames() {
 function setInitTurn() {
     const firstPlayer = getRandomAccount(gamePlayerList)
     if (!firstPlayer || typeof firstPlayer.accountId !== 'string') {
-        activeAccount.value = gamePlayerList[activeIndex.value];
+        gameController.state.activeAccount = gamePlayerList[gameController.state.activeIndex];
         console.warn('The first player accountId is empty');
         return;
     }
