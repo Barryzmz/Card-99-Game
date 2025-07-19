@@ -65,12 +65,13 @@
     </div>
 </template>
 <script setup lang="ts">
-import { reactive, toRefs, onMounted, ref, computed, nextTick  } from 'vue'
+import { toRefs, onMounted, ref, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import type { CardValue, Card, Account } from '@/types/baseType'
 import { convertToCard, getRandomAccount } from '@/utils/cardUtils'
+import { useGameController } from '@/utils/gameController'
 import ScorePanel from '@/components/ScorePanel.vue'
 import PlayerArea from '@/components/Player.vue'
 import ComputerPlayer from '@/components/ComputerPlayer.vue'
@@ -79,22 +80,7 @@ import downArrow from '@/assets/down-arrow.svg'
 import nyanCat from '@/assets/nyan-cat.gif'
 
 const router = useRouter()
-
-function createGameState() {
-    return {
-        gameOver: false as boolean,
-        deckID: null as string | null,
-        playCount: 0 as number,
-        latestPlayedCard: null as Card | null,
-        latestPlayer: null as Account | null,
-        gameScore: 0 as number,
-        activeIndex: 0 as number,
-        activeAccount: null as Account | null,
-        isReversed: false as boolean,
-        maxHandCardCount: 5 as number
-    }
-}
-const state = reactive(createGameState())
+const gameController = useGameController()
 const {
     gameOver,
     deckID,
@@ -106,7 +92,8 @@ const {
     activeAccount,
     isReversed,
     maxHandCardCount
-} = toRefs(state)
+} = toRefs(gameController.state)
+
 const props = defineProps<{
     playerName: string
     opponentCount: number
@@ -348,7 +335,7 @@ function setInitTurn() {
 
 // 重置遊戲
 async function resetGame() {
-    Object.assign(Object.assign(state, createGameState()))
+    gameController.reset();
     scorePanelRef.value?.resetScorePanel();
     for (const child of allPlayerRefs.value) {
         if (!child) continue
