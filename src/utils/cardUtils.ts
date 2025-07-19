@@ -77,7 +77,7 @@ export function CardConfigMapping(cardValue: CardValue): { score: number, level:
   }
 }
 
-export function analyszeBestPlay(cardsList: Card[], score: number): Card | null {
+export function analyzeBestPlay(cardsList: Card[], score: number): Card | null {
   const level1 = cardsList
   .filter(card => card.level === 1 && card.score <= score)
   .sort((a, b) => b.score - a.score);

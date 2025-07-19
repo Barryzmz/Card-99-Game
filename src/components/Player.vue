@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { onMounted, toRefs, reactive, ref, watch, computed } from 'vue'
 import type { Card, Account } from '@/types/baseType'
-import { translateCardsValue, translateCardsSuit, analyszeBestPlay } from '@/utils/cardUtils'
+import { translateCardsValue, translateCardsSuit, analyzeBestPlay } from '@/utils/cardUtils'
 import AddOrSubEffectDialog from '@/components/AddOrSubEffectDialog.vue'
 import DesignateEffectDialog from '@/components/DesignateEffectDialog.vue'
 function createPlayerState() {
@@ -96,7 +96,7 @@ function handleCardScoring(card: Card) {
 
 // 處理出牌邏輯
 async function AnalysisPlayCard() {
-    const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value)
+    const bestCard = analyzeBestPlay(cardList.value, remainingToMaxScore.value)
     if (bestCard == null) {
         console.log(props.playerInfo.name, '<<<<<lose>>>>>')
         reportPlayerEliminated(props.playerInfo)

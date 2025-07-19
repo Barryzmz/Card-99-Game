@@ -21,7 +21,7 @@
 </template>
 <script setup lang="ts">
 import {onMounted, toRefs, reactive, watch, computed } from 'vue'
-import { analyszeBestPlay, getRandomAccount } from '@/utils/cardUtils'
+import { analyzeBestPlay, getRandomAccount } from '@/utils/cardUtils'
 import type { Card, Account } from '@/types/baseType'
 import avatar from '@/assets/avator.svg'
 import pointer from '@/assets/left-arrow.svg'
@@ -78,7 +78,7 @@ function notifyPlayerEliminatedByToast(playerName: string): void {
 async function AnalysisPlayCard() {
     //先等2秒再出牌
     await new Promise(resolve => setTimeout(resolve, 2000))
-    const bestCard = analyszeBestPlay(cardList.value, remainingToMaxScore.value)
+    const bestCard = analyzeBestPlay(cardList.value, remainingToMaxScore.value)
     if (bestCard == null) {
         console.log(props.playerInfo.name, '<<<<<lose>>>>>')
         console.log(props.playerInfo.name, 'gameScore', props.gameScore, "'s cardList", cardList.value)
