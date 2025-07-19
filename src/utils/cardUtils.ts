@@ -1,4 +1,5 @@
 import type { CardValue, Card, Account } from '@/types/baseType'
+import * as strategies from '@/utils/cardStrategy'
 
 export function translateCardsValue(value: any): string {
   switch (value) {
@@ -30,48 +31,49 @@ export function translateCardsSuit(suit: string): number {
   }
 }
 
-export function convertToCard(cardValue: CardValue): Card {
-  const { score, level, effect } = determineCardAttributes(cardValue)
+// Factory：把 CardValue => Card
+export function cardFactory(cardValue: CardValue): Card {
+  const { score, level, effect, effectStrategy } = CardConfigMapping(cardValue);
   return {
     cardValue,
-    level,
-    value: parseInt(translateCardsValue(cardValue.value)),
-    effect,
-    score,
-    designate:{accountId:'',name:''},
+    score: score,
+    level: level,
+    effect: effect,
+    designate: { accountId: '', name: '' },
+    effectStrategy: effectStrategy
   }
 }
 
-export function determineCardAttributes(cardValue: CardValue): { score: number, level: number; effect: string } {
+export function CardConfigMapping(cardValue: CardValue): { score: number, level: number; effect: string; effectStrategy: strategies.CardStrategy } {
   const value = cardValue.value
   const suit = cardValue.suit
 
   if (value === 'ACE') {
     if(suit === 'SPADES'){
-        // 黑桃A為重置牌
-        return { score: 0, level: 3, effect: 'reset_score' }
+      // 黑桃A為重置牌
+      return { score: 0, level: 3, effect: 'reset_score', effectStrategy: new strategies.ResetScoreStrategy() }
     }
     else
     {
-        return { score: 1, level: 1, effect: '' }
+      return { score: 1, level: 1, effect: '', effectStrategy: new strategies.AddStrategy() }
     }
   }
 
   switch (value) {
     case '4':
-      return { score: 0, level: 2, effect: 'reverse_turn_order' }
+      return { score: 0, level: 2, effect: 'reverse_turn_order', effectStrategy: new strategies.ReverseTurnOrderStrategy() }
     case '5':
-      return { score: 0, level: 2, effect: 'designate_next_player' }
+      return { score: 0, level: 2, effect: 'designate_next_player', effectStrategy: new strategies.DesignateNextPlayerStrategy() }
     case '10':
-      return { score: 10, level: 2, effect: 'add_or_sub_ten' }
+      return { score: 10, level: 2, effect: 'add_or_sub_ten', effectStrategy: new strategies.AddOrSubStrategy() }
     case 'JACK':
-      return { score: 0, level: 2, effect: 'skip_turn' }
+      return { score: 0, level: 2, effect: 'skip_turn', effectStrategy: new strategies.SkipTurnStrategy() }
     case 'QUEEN':
-      return { score: 20, level: 2, effect: 'add_or_sub_twenty' }
+      return { score: 20, level: 2, effect: 'add_or_sub_twenty', effectStrategy: new strategies.AddOrSubStrategy() }
     case 'KING':
-      return { score: 0, level: 2, effect: 'set_score_to_ninetyNine' }
+      return { score: 0, level: 2, effect: 'set_score_to_ninetyNine', effectStrategy: new strategies.SetNinetyNineStrategy() }
     default:
-      return { score: parseInt(value), level: 1, effect: '' }
+      return { score: parseInt(translateCardsValue(value)), level: 1, effect: '', effectStrategy: new strategies.AddStrategy() }
   }
 }
 

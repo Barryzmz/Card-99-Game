@@ -70,7 +70,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import type { CardValue, Card, Account } from '@/types/baseType'
-import { convertToCard, getRandomAccount } from '@/utils/cardUtils'
+import { cardFactory, getRandomAccount } from '@/utils/cardUtils'
 import { useGameController } from '@/utils/gameController'
 import ScorePanel from '@/components/ScorePanel.vue'
 import PlayerArea from '@/components/Player.vue'
@@ -173,8 +173,7 @@ async function getInitCards() {
             const result = await axios.get(
                 `https://www.deckofcardsapi.com/api/deck/${gameController.state.deckID}/draw/?count=5`
             )
-            const initCardList: Card[] = (result.data.cards as CardValue[])
-                .map(cv => convertToCard(cv))
+            const initCardList: Card[] = (result.data.cards as CardValue[]).map(cv => cardFactory(cv))
 
             child.receiveCards([...initCardList])
         }
@@ -296,7 +295,7 @@ async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => voi
         await getDeck();
         data = await tryDraw(1);
     }
-    const newCard = convertToCard((data.cards as CardValue[])[0]);
+    const newCard = cardFactory((data.cards as CardValue[])[0]);
     targetInstance.receiveCards([newCard]);
 }
 

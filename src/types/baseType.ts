@@ -1,3 +1,5 @@
+import type { CardStrategy } from '@/utils/cardStrategy'
+
 export interface Account {
   idx: number
   avatar: string
@@ -27,10 +29,10 @@ export const BackCard: CardValue = {
 export interface Card {
   cardValue: CardValue,
   level: number,
-  value: number,
   effect: string,
   score: number,
   designate: {accountId: string, name: string}
+  effectStrategy: CardStrategy
 }
 
 export interface RoundSetting {
