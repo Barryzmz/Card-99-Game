@@ -56,10 +56,8 @@ export class DesignateNextPlayerStrategy implements CardStrategy {
   nextPlayer = false
   execute(game: GameController, gamePlayerList: Account[], card: Card): void {
     const { activeIndex, activeAccount }  = setActiveByAccountId(card.designate.accountId, gamePlayerList)
-    console.log('DesignateNextPlayerStrategy:', activeIndex, activeAccount)
     game.state.activeIndex = activeIndex;
     game.state.activeAccount = activeAccount;
-    console.log('DesignateNextPlayerStrategy2:', game.state.activeIndex, game.state.activeAccount)
     this.updateEffect(card);
   }
   updateEffect(card: Card): void {

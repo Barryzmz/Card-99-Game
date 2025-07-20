@@ -28,30 +28,23 @@
                     <h3 class="m-0">Latest state:</h3>
                     <h4 class="m-0">player: {{ latestPlayer }}</h4>
                     <h4 class="m-0">play: {{ latestPlayedCard?.cardValue.code }}</h4>
-                    <h4 class="m-0">effect: {{ latestEffect }}</h4>
+                    <h4 class="m-0">effect: {{ latestPlayedCard?.effectStrategy.effect }}</h4>
                 </div>
             </div>
         </div>
     </div>
 </template>
 <script setup lang="ts">
-import { reactive, toRefs } from 'vue'
+import { toRefs } from 'vue'
 import type { Card } from '@/types/baseType'
-function createScorePanelState() {
-    return {
-        latestEffect: '' as string,
-        latestPlayer: '' as string,
-        latestPlayedCard: null as Card | null,
-    }
-}
-const state = reactive(createScorePanelState())
-const { latestEffect, latestPlayer, latestPlayedCard } = toRefs(state)
 
 const props = defineProps<{
     currentPlayer: string | null
     maxHandCardCount: number | null
     gameScore: number | null
     playCount: number | null
+    latestPlayedCard: Card | null
+    latestPlayer: string | null
 }>()
 
 const {
@@ -59,57 +52,10 @@ const {
     playCount,
     currentPlayer,
     maxHandCardCount,
+    latestPlayedCard,
+    latestPlayer
 } = toRefs(props)
 
-// 處理Effect 描述
-function handleCardEffectDiscription(card: Card, dealer: string) {
-    latestPlayer.value = dealer
-    latestPlayedCard.value = card
-
-    switch (card.effect) {
-        case "reverse_turn_order":
-            latestEffect.value = "Reverse turn order";
-            break;
-        case "designate_next_player":
-            latestEffect.value = `Designate to ${card.designate.name}`;
-            break;
-        case "add_or_sub_ten":
-            if (card.score > 0)
-                latestEffect.value = `Add 10`
-            else
-                latestEffect.value = `subtract 10`
-            break;
-        case "skip_turn":
-            latestEffect.value = `Skip turn`
-            break;
-        case "add_or_sub_twenty":
-            if (card.score > 0)
-                latestEffect.value = `Add 20`
-            else
-                latestEffect.value = `subtract 20`
-            break;
-        case "set_score_to_ninetyNine":
-            latestEffect.value = `Set the score to 99`
-            break;
-        case "reset_score":
-            latestEffect.value = `Set the score to 0`
-            break;
-        default:
-            latestEffect.value = `Add ${card.score}`
-            break;
-    }
-    console.log('PlayCount:', playCount.value, latestPlayer.value, latestEffect.value, 'SCORE:', gameScore.value)
-}
-
-// 重置計分區塊
-function resetScorePanel() {
-    Object.assign(state, createScorePanelState())
-}
-
-defineExpose({
-    handleCardEffectDiscription,
-    resetScorePanel
-})
 </script>
 
 <style scoped></style>

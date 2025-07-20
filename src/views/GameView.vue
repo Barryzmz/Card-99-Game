@@ -47,8 +47,8 @@
                             :maxHandCardCount="gameController.state.maxHandCardCount"
                             :gameScore="gameController.state.gameScore"
                             :playCount="gameController.state.playCount"
-                            @score-updated="gameController.state.gameScore = $event"
-                            @playCount-updated="gameController.state.playCount = $event"
+                            :latestPlayedCard="gameController.state.latestPlayedCard"
+                            :latestPlayer="gameController.state.latestPlayer?.name ?? null"
                         />
                     </div>
                 </div>
@@ -65,7 +65,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { toRefs, onMounted, ref, computed, nextTick } from 'vue'
+import {onMounted, ref, computed} from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Swal from 'sweetalert2'
@@ -194,15 +194,14 @@ function setActiveByAccountId(accountId: string) {
 }
 
 // 計分並將卡牌傳入ScorePanel 顯示
-async function handleCardScoring(card: Card) {
+function handleCardScoring(card: Card) {
     const dealer = gameController.state.activeAccount?.name || ''
     gameController.state.latestPlayedCard = card
     gameController.state.latestPlayer = gameController.state.activeAccount
     const currentInst = allPlayerRefs.value[gameController.state.activeIndex] // 得到目前玩家的ref
     card.effectStrategy.execute(gameController, gamePlayerList, card); // 處理牌的功能
     gameController.state.playCount ++ // 輪次加1
-    await nextTick()
-    scorePanelRef.value?.handleCardEffectDiscription(card, dealer)
+    console.log('PlayCount:', gameController.state.playCount, gameController.state.latestPlayer?.name, gameController.state.latestPlayedCard.effectStrategy.effect, 'SCORE:', gameController.state.gameScore)
     //用currentInst發牌給目前玩家
     if (currentInst) {
         getNewCard(currentInst)
@@ -289,7 +288,6 @@ function setInitTurn() {
 // 重置遊戲
 async function resetGame() {
     gameController.reset();
-    scorePanelRef.value?.resetScorePanel();
     for (const child of allPlayerRefs.value) {
         if (!child) continue
         child.resetPlayer();
