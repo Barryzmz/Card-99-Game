@@ -24,26 +24,25 @@
             </div>
             <div class="col-9 p-0 d-flex flex-column justify-content-between">
                 <div class="d-flex justify-content-center align-items-start pt-2 my-2">
-                    <div class="col-4 p-0">
-                        <h3 class="text-white"> </h3>
-                    </div>
-                    <div class="col-4 d-flex justify-content-center align-items-center">
-                        <h3 class="text-white">Card 99 Game</h3>
-                    </div>
-                    <div class="col-4 p-0">
+                    <div class="col-12 p-0">
                         <div class="d-flex justify-content-center align-items-center">
                             <RouterLink to="/" class="btn btn-primary mx-1">
                                 Back to Home
                             </RouterLink>
-                            <button type="button" class="btn btn-primary mx-1" @click="resetGame">Reset Game</button>
+                            <button type="button" class="btn btn-primary mx-1" @click="resetGame">
+                                Reset Game
+                            </button>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#rulesModal">
+                                rule
+                            </button>
                         </div>
-                        
+
                     </div>
                 </div>
                 <div class="row d-flex justify-content-center mx-0 overflow-hidden">
                     <div class="col-8 p-0">
-                        <ScorePanel ref="scorePanelRef" 
-                            :currentPlayer="gameController.state.activeAccount?.name ?? null" 
+                        <ScorePanel ref="scorePanelRef"
+                            :currentPlayer="gameController.state.activeAccount?.name ?? null"
                             :maxHandCardCount="gameController.state.maxHandCardCount"
                             :gameScore="gameController.state.gameScore"
                             :playCount="gameController.state.playCount"
@@ -63,9 +62,10 @@
             </div>
         </div>
     </div>
+    <RulesDialog />
 </template>
 <script setup lang="ts">
-import {onMounted, ref, computed} from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Swal from 'sweetalert2'
@@ -75,6 +75,7 @@ import { useGameController } from '@/utils/gameController'
 import ScorePanel from '@/components/ScorePanel.vue'
 import PlayerArea from '@/components/Player.vue'
 import ComputerPlayer from '@/components/ComputerPlayer.vue'
+import RulesDialog from '@/components/RulesDialog.vue'
 import upArrow from '@/assets/up-arrow.svg'
 import downArrow from '@/assets/down-arrow.svg'
 import nyanCat from '@/assets/nyan-cat.gif'
@@ -89,7 +90,7 @@ const props = defineProps<{
 }>()
 const { playerName, opponentCount, firstRound, nextRound } = props
 let player: Account = { idx: 0, avatar: '', accountId: 'player0', name: playerName, status: 'playing' }
-const computerList : Account[] = [
+const computerList: Account[] = [
     { idx: 1, avatar: '', accountId: 'player1', name: 'Bot A', status: 'playing' },
     { idx: 2, avatar: '', accountId: 'player2', name: 'Bot B', status: 'playing' },
     { idx: 3, avatar: '', accountId: 'player3', name: 'Bot C', status: 'playing' },
@@ -97,7 +98,7 @@ const computerList : Account[] = [
     { idx: 5, avatar: '', accountId: 'player5', name: 'Bot E', status: 'playing' }
 ]
 let gamePlayerList: Account[] = []
-let selectComputerList= ref<Account[]>([])
+let selectComputerList = ref<Account[]>([])
 const scorePanelRef = ref()
 const computerPlayersRef = ref<InstanceType<typeof ComputerPlayer>[]>([])
 const playerRef = ref<InstanceType<typeof PlayerArea> | null>(null)
@@ -200,7 +201,7 @@ function handleCardScoring(card: Card) {
     gameController.state.latestPlayer = gameController.state.activeAccount
     const currentInst = allPlayerRefs.value[gameController.state.activeIndex] // 得到目前玩家的ref
     card.effectStrategy.execute(gameController, gamePlayerList, card); // 處理牌的功能
-    gameController.state.playCount ++ // 輪次加1
+    gameController.state.playCount++ // 輪次加1
     console.log('PlayCount:', gameController.state.playCount, gameController.state.latestPlayer?.name, gameController.state.latestPlayedCard.effectStrategy.effect, 'SCORE:', gameController.state.gameScore)
     //用currentInst發牌給目前玩家
     if (currentInst) {
@@ -269,7 +270,7 @@ async function getNewCard(targetInstance: { receiveCards: (cards: Card[]) => voi
 // 把使用者加入遊戲順序清單
 function getPlayerNames() {
     selectComputerList.value = computerList.slice(0, opponentCount)
-    gamePlayerList = [ player, ...selectComputerList.value ]
+    gamePlayerList = [player, ...selectComputerList.value]
 }
 
 // 設定第一位出牌的玩家
