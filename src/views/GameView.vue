@@ -24,19 +24,45 @@
             </div>
             <div class="col-9 p-0 d-flex flex-column justify-content-between">
                 <div class="d-flex justify-content-center align-items-start pt-2 my-2">
-                    <div class="col-12 p-0">
+                    <div class="col-4 p-0">
+                        <h3 class="text-white"> </h3>
+                    </div>
+                    <div class="col-4 d-flex justify-content-center align-items-center">
+                        <h3 class="text-white">Card 99 Game</h3>
+                    </div>
+                    <div class="col-4 p-0">
                         <div class="d-flex justify-content-center align-items-center">
-                            <RouterLink to="/" class="btn btn-primary mx-1">
-                                Back to Home
+                            <RouterLink
+                                to="/"
+                                class="btn btn-primary mx-1"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="bottom"
+                                title="Back to Home"
+                            >
+                                <i class="bi bi-house-fill fs-4"></i>
                             </RouterLink>
-                            <button type="button" class="btn btn-primary mx-1" @click="resetGame">
-                                Reset Game
+                            <button
+                                type="button"
+                                class="btn btn-primary mx-1"
+                                @click="resetGame"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="bottom"
+                                title="Reset th game"
+                            >
+                                <i class="bi bi-arrow-clockwise fs-4"></i>
                             </button>
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#rulesModal">
-                                rule
+                            <button
+                                data-bs-toggle="modal"
+                                data-bs-target="#rulesModal"
+                                type="button"
+                                class="btn btn-primary mx-1"
+                                
+                                data-bs-placement="bottom"
+                                title="Rule of the game"
+                            >
+                                <i class="bi bi-info-circle-fill fs-4"></i>
                             </button>
                         </div>
-
                     </div>
                 </div>
                 <div class="row d-flex justify-content-center mx-0 overflow-hidden">
@@ -65,7 +91,7 @@
     <RulesDialog />
 </template>
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Swal from 'sweetalert2'
@@ -195,7 +221,7 @@ function setActiveByAccountId(accountId: string) {
 }
 
 // 計分並將卡牌傳入ScorePanel 顯示
-function handleCardScoring(card: Card) {
+async function handleCardScoring(card: Card) {
     const dealer = gameController.state.activeAccount?.name || ''
     gameController.state.latestPlayedCard = card
     gameController.state.latestPlayer = gameController.state.activeAccount
@@ -204,6 +230,7 @@ function handleCardScoring(card: Card) {
     gameController.state.playCount++ // 輪次加1
     console.log('PlayCount:', gameController.state.playCount, gameController.state.latestPlayer?.name, gameController.state.latestPlayedCard.effectStrategy.effect, 'SCORE:', gameController.state.gameScore)
     //用currentInst發牌給目前玩家
+    await nextTick() 
     if (currentInst) {
         getNewCard(currentInst)
     }
