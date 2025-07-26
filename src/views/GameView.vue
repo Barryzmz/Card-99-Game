@@ -1,13 +1,13 @@
 <template>
     <div class="container-fluid  p-0 bg-success">
         <div class="row d-flex justify-content-center mx-0 ">
-            <div class="col-3 pt-2 min-vh-100 bg-secondary ">
+            <div class="col-2 pt-2 min-vh-100 bg-secondary ">
                 <div class="d-flex justify-content-center align-items-center bg-light p-2 mb-2 rounded">
                     <div class="col-auto">
-                        <h3 class="text-dark mb-0">Turn Order:</h3>
+                        <h5 class="text-dark mb-0 fw-bold">Turn Order:</h5>
                     </div>
-                    <div class="col-auto mx-3">
-                        <img :src="gameController.state.isReversed ? upArrow : downArrow" style="height: 40px;" alt="turn order arrow" />
+                    <div class="col-auto ms-2">
+                        <img :src="gameController.state.isReversed ? upArrow : downArrow" style="height: 30px;" alt="turn order arrow" />
                     </div>
                 </div>
                 <ComputerPlayer
@@ -22,7 +22,7 @@
                     @report-computerPlayer-eliminated="handleComputerPlayerEliminated"
                 />
             </div>
-            <div class="col-9 p-0 d-flex flex-column justify-content-between">
+            <div class="col-10 p-0 d-flex flex-column justify-content-between">
                 <div class="d-flex justify-content-center align-items-start pt-2 my-2">
                     <div class="col-4 p-0">
                         <h3 class="text-white"> </h3>
@@ -47,7 +47,7 @@
                                 @click="resetGame"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="bottom"
-                                title="Reset th game"
+                                title="Reset the game"
                             >
                                 <i class="bi bi-arrow-clockwise fs-4"></i>
                             </button>

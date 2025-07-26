@@ -1,11 +1,11 @@
 <template>
-    <div class="d-flex justify-content-start align-items-center gap-4 mx-4 pb-2">
+    <div class="d-flex justify-content-start align-items-center gap-2 pb-2">
         <div class="d-flex flex-column bg-light p-2 rounded"
             :class="{ 'disabled-player': props.playerInfo.status === 'eliminated' }">
             <div class="d-flex align-items-center mb-2">
-                <img :src="avatar" style="height: 50px;" />
+                <img :src="avatar" style="height: 40px;" />
                 <div class="text-start ms-2">
-                    <h5 class="mb-0">{{ props.playerInfo.name }}</h5>
+                    <p class="mb-0">{{ props.playerInfo.name }}</p>
                 </div>
             </div>
             <div class="mt-auto text-center">
