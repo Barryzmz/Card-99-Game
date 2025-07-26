@@ -27,9 +27,15 @@
             </div>
         </div>
     </div>
-    <AddOrSubEffectDialog :visible="showAddOrSubDialog" :category="categoryAddOrSubDialog" :gameScore="props.gameScore"
+    <AddOrSubEffectDialog 
+        :visible="showAddOrSubDialog" 
+        :category="categoryAddOrSubDialog" 
+        :gameScore="props.gameScore"
         @confirm="handleAddOrSubEffect" />
-    <DesignateEffectDialog :visible="showDesignateDialog" :otherPlayerList="otherPlayerList"
+    <DesignateEffectDialog 
+        :visible="showDesignateDialog"
+        :otherPlayerList="otherPlayerList"
+        :gameScore="props.gameScore"
         @confirm="handleDesignateEffect" />
 </template>
 <script setup lang="ts">
